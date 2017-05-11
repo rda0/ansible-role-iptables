@@ -1,0 +1,60 @@
+---
+- name: create directory /etc/iptables
+  file: path=/etc/iptables state=directory
+
+- name: create iptables config
+  include: partials/deploy-template.yml
+  with_items:
+    - src: iptables/iptables.conf
+      dest: /etc/iptables/iptables.conf
+    - src: iptables/conf.nat.policy
+      dest: /etc/iptables/conf.nat.policy
+    - src: iptables/conf.nat.rules
+      dest: /etc/iptables/conf.nat.rules
+    - src: iptables/conf.filter.policy
+      dest: /etc/iptables/conf.filter.policy
+    - src: iptables/conf.filter.rules.head.conntrack.sh
+      dest: /etc/iptables/conf.filter.rules.head.conntrack.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.head.ipv4.lo.sh
+      dest: /etc/iptables/conf.filter.rules.head.ipv4.lo.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.head.ipv6.lo.sh
+      dest: /etc/iptables/conf.filter.rules.head.ipv6.lo.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.head.lo
+      dest: /etc/iptables/conf.filter.rules.head.lo
+    - src: iptables/conf.filter.rules.head.ipv4.icmp
+      dest: /etc/iptables/conf.filter.rules.head.ipv4.icmp
+    - src: iptables/conf.filter.rules.head.ipv6.icmp
+      dest: /etc/iptables/conf.filter.rules.head.ipv6.icmp
+    - src: iptables/conf.filter.rules.head.ratelimit.sh
+      dest: /etc/iptables/conf.filter.rules.head.ratelimit.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.body.sh
+      dest: /etc/iptables/conf.filter.rules.body.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.tail.sh
+      dest: /etc/iptables/conf.filter.rules.tail.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.head.ipv4.private.sh
+      dest: /etc/iptables/conf.filter.rules.head.ipv4.private.sh
+      mode: '0755'
+    - src: iptables/iptables
+      dest: /etc/network/if-pre-up.d/iptables
+      mode: '0755'
+  loop_control:
+    loop_var: file
+  when: use_iptables|default(true)
+
+- name: create iptables syslog config
+  include: partials/deploy-template.yml
+  with_items:
+    - src: iptables/rsyslog.conf
+      dest: /etc/rsyslog.d/iptables.conf
+      notify: restart rsyslog
+    - src: iptables/logrotate.conf
+      dest: /etc/logrotate.d/iptables.conf
+  loop_control:
+    loop_var: file
+  when: use_iptables|default(true)
