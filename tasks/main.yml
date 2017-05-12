@@ -1,4 +1,11 @@
 ---
+- name: install minimal pkgs
+  apt: name={{ item }} cache_valid_time=3600
+  with_items:
+    - ipset
+    - iprange
+    - xtables-addons-common
+
 - name: create directory /etc/iptables
   file: path=/etc/iptables state=directory
 
@@ -34,11 +41,26 @@
     - src: iptables/conf.filter.rules.body.sh
       dest: /etc/iptables/conf.filter.rules.body.sh
       mode: '0755'
+    - src: iptables/conf.filter.rules.body.ipv4.sh
+      dest: /etc/iptables/conf.filter.rules.body.ipv4.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.body.ipv6.sh
+      dest: /etc/iptables/conf.filter.rules.body.ipv6.sh
+      mode: '0755'
     - src: iptables/conf.filter.rules.tail.sh
       dest: /etc/iptables/conf.filter.rules.tail.sh
       mode: '0755'
+    - src: iptables/conf.filter.rules.tail.ipv4.sh
+      dest: /etc/iptables/conf.filter.rules.tail.ipv4.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.tail.ipv6.sh
+      dest: /etc/iptables/conf.filter.rules.tail.ipv6.sh
+      mode: '0755'
     - src: iptables/conf.filter.rules.head.ipv4.private.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv4.private.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.head.ipv6.private.sh
+      dest: /etc/iptables/conf.filter.rules.head.ipv6.private.sh
       mode: '0755'
     - src: iptables/iptables
       dest: /etc/network/if-pre-up.d/iptables
