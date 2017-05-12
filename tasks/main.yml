@@ -31,10 +31,12 @@
       mode: '0755'
     - src: iptables/conf.filter.rules.head.lo
       dest: /etc/iptables/conf.filter.rules.head.lo
-    - src: iptables/conf.filter.rules.head.ipv4.icmp
-      dest: /etc/iptables/conf.filter.rules.head.ipv4.icmp
-    - src: iptables/conf.filter.rules.head.ipv6.icmp
-      dest: /etc/iptables/conf.filter.rules.head.ipv6.icmp
+    - src: iptables/conf.filter.rules.head.ipv4.icmp.sh
+      dest: /etc/iptables/conf.filter.rules.head.ipv4.icmp.sh
+      mode: '0755'
+    - src: iptables/conf.filter.rules.head.ipv6.icmp.sh
+      dest: /etc/iptables/conf.filter.rules.head.ipv6.icmp.sh
+      mode: '0755'
     - src: iptables/conf.filter.rules.head.ratelimit.sh
       dest: /etc/iptables/conf.filter.rules.head.ratelimit.sh
       mode: '0755'
