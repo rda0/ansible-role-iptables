@@ -114,3 +114,10 @@
   loop_control:
     loop_var: file
   when: use_iptables|default(true)
+
+#- name: custom network
+#  lineinfile:
+#    dest: /etc/iptables/iptables.conf
+#    regexp: "^NET4_CUSTOM=\"{{ iptables_net4_custom }}\""
+#    line: "NET4_CUSTOM=\"{{ iptables_net4_custom }}\""
+#  when: use_iptables|default(true) and iptables_net4_custom is defined
