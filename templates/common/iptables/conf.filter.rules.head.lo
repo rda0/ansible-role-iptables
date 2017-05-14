@@ -1,0 +1,2 @@
+# Allow local outbound loopback
+-A OUTPUT  -o lo -j ACCEPT

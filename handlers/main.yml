@@ -1,0 +1,6 @@
+---
+- name: noop
+  command: /bin/true
+
+- name: restore iptables
+  command: /etc/iptables/iptables.sh

@@ -1,6 +1,9 @@
 ---
-- name: install minimal pkgs
-  apt: name={{ item }} cache_valid_time=3600
+- name: install required pkgs for iptables
+  apt: 
+    name: '{{ item }}'
+    update_cache: yes
+    cache_valid_time: 3600
   with_items:
     - ipset
     - iprange
@@ -14,61 +17,90 @@
   with_items:
     - src: iptables/iptables.conf
       dest: /etc/iptables/iptables.conf
+      notify: restore iptables
     - src: iptables/conf.nat.policy
       dest: /etc/iptables/conf.nat.policy
+      notify: restore iptables
     - src: iptables/conf.nat.rules
       dest: /etc/iptables/conf.nat.rules
+      notify: restore iptables
     - src: iptables/conf.filter.policy
       dest: /etc/iptables/conf.filter.policy
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.conntrack.sh
       dest: /etc/iptables/conf.filter.rules.head.conntrack.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.ipv4.lo.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv4.lo.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.ipv6.lo.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv6.lo.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.lo
       dest: /etc/iptables/conf.filter.rules.head.lo
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.ipv4.icmp.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv4.icmp.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.ipv6.icmp.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv6.icmp.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.ratelimit.sh
       dest: /etc/iptables/conf.filter.rules.head.ratelimit.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.body.sh
       dest: /etc/iptables/conf.filter.rules.body.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.body.ipv4.sh
       dest: /etc/iptables/conf.filter.rules.body.ipv4.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.body.ipv6.sh
       dest: /etc/iptables/conf.filter.rules.body.ipv6.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.tail.sh
       dest: /etc/iptables/conf.filter.rules.tail.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.tail.ipv4.sh
       dest: /etc/iptables/conf.filter.rules.tail.ipv4.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.tail.ipv6.sh
       dest: /etc/iptables/conf.filter.rules.tail.ipv6.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.ipv4.private.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv4.private.sh
       mode: '0755'
+      notify: restore iptables
     - src: iptables/conf.filter.rules.head.ipv6.private.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv6.private.sh
       mode: '0755'
-    - src: iptables/iptables
-      dest: /etc/network/if-pre-up.d/iptables
+      notify: restore iptables
+    - src: iptables/iptables.sh
+      dest: /etc/iptables/iptables.sh
       mode: '0755'
+      notify: restore iptables
   loop_control:
     loop_var: file
+  when: use_iptables|default(true)
+
+- name: create link /etc/network/if-pre-up.d/iptables
+  file:
+    src: /etc/iptables/iptables.sh
+    dest: /etc/network/if-pre-up.d/iptables
+    owner: root
+    group: root
+    state: link
   when: use_iptables|default(true)
 
 - name: create iptables syslog config

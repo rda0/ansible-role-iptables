@@ -1,0 +1,42 @@
+#!/bin/bash
+
+. /etc/iptables/iptables.conf
+
+echo -e "-N i-rate"
+echo -e "-N f-rate"
+echo -e "-4 -A INPUT   -m conntrack --ctstate NEW -m set ! --match-set admin src -j i-rate"
+echo -e "-4 -A FORWARD -m conntrack --ctstate NEW -m set ! --match-set admin src -j f-rate"
+echo -e "-6 -A INPUT   -m conntrack --ctstate NEW -m set ! --match-set admin6 src -j i-rate"
+echo -e "-6 -A FORWARD -m conntrack --ctstate NEW -m set ! --match-set admin6 src -j f-rate"
+
+#echo -e "# Rate limiting ssh (log new connections to port 22 in list ssh-rate)"
+#echo -e "   -A i-rate -p tcp --dport 22 -m recent --name ssh-rate --set"
+#echo -e "-4 -A i-rate -p tcp --dport 22 -m set   --match-set trusted src  -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 20 -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+#echo -e "-4 -A i-rate -p tcp --dport 22 -m set   --match-set trusted src  -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 20 -j REJECT"
+#echo -e "-4 -A i-rate -p tcp --dport 22 -m set ! --match-set trusted src  -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 5  -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+#echo -e "-4 -A i-rate -p tcp --dport 22 -m set ! --match-set trusted src  -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 5  -j DROP"
+#echo -e "-6 -A i-rate -p tcp --dport 22 -m set   --match-set trusted6 src -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 20 -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+#echo -e "-6 -A i-rate -p tcp --dport 22 -m set   --match-set trusted6 src -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 20 -j REJECT"
+#echo -e "-6 -A i-rate -p tcp --dport 22 -m set ! --match-set trusted6 src -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 5  -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+#echo -e "-6 -A i-rate -p tcp --dport 22 -m set ! --match-set trusted6 src -m recent --name ssh-rate --update --rttl --seconds 60 --hitcount 5  -j DROP"
+
+echo -e "-A i-rate -p tcp --dport 22 -m recent --set --name ssh-rate"
+echo -e "-A i-rate -p tcp --dport 22 -m set   --match-set trusted src -m recent --rcheck --rttl --seconds 60  --hitcount 20 --name ssh-rate -j SET --add-set block-ssh-trusted src --exist"
+echo -e "-A i-rate -p tcp --dport 22 -m set   --match-set trusted src -m recent --rcheck --rttl --seconds 60  --hitcount 20 --name ssh-rate -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+echo -e "-A i-rate -p tcp --dport 22 -m set ! --match-set trusted src -m recent --rcheck --rttl --seconds 120 --hitcount 5  --name ssh-rate -j SET --add-set block-ssh src --exist"
+echo -e "-A i-rate -p tcp --dport 22 -m set ! --match-set trusted src -m recent --rcheck --rttl --seconds 120 --hitcount 5  --name ssh-rate -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+echo -e "-A i-rate -m set --match-set block-ssh-trusted src -j REJECT"
+echo -e "-A i-rate -m set --match-set block-ssh         src -j DROP"
+
+echo -e "# Attempt to block portscans"
+echo -e "# Anyone who tried to portscan us is locked out for an entire day (86400 s)"
+echo -e "-A i-rate -m recent --name portscan --rcheck --seconds 120 -j DROP"
+echo -e "-A f-rate -m recent --name portscan --rcheck --seconds 120 -j DROP"
+echo -e "# Once the day has passed, remove them from the portscan list"
+echo -e "-A i-rate -m recent --name portscan --remove"
+echo -e "-A f-rate -m recent --name portscan --remove"
+echo -e "# These rules add scanners to the portscan list, and log the attempt."
+echo -e "-A i-rate -p tcp -m tcp --dport 139 -m recent --name portscan --set -j LOG ${LOG_OPTS} \"[ipt-i]portscan: \""
+echo -e "-A i-rate -p tcp -m tcp --dport 139 -m recent --name portscan --set -j DROP"
+echo -e "-A f-rate -p tcp -m tcp --dport 139 -m recent --name portscan --set -j LOG ${LOG_OPTS} \"[ipt-f]ssh-rate: \""
+echo -e "-A f-rate -p tcp -m tcp --dport 139 -m recent --name portscan --set -j DROP"
