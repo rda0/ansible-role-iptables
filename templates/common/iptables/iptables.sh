@@ -22,8 +22,8 @@ UP6=/etc/iptables/up.ipv6.rules
 /sbin/ip6tables -X
 /sbin/ip6tables -A INPUT -p tcp --dport 22 -j ACCEPT
 /sbin/ip6tables -A OUTPUT -p tcp --sport 22 -j ACCEPT
-[[ "${DEBUG}" > 0 ]] && >&2 echo "restart fail2ban"
-/bin/systemctl restart fail2ban
+#[[ "${DEBUG}" > 0 ]] && >&2 echo "restart fail2ban"
+#/bin/systemctl restart fail2ban
 
 # make ipset config
 
@@ -272,5 +272,8 @@ echo -ne '\nCOMMIT\n' >> "${UP6}"
 [[ "${DEBUG}" > 0 ]] && >&2 echo "load ipv6 rules: ${UP6}"
 /sbin/ip6tables-restore < "${UP6}"
 
-[[ "${DEBUG}" > 0 ]] && >&2 echo "restart fail2ban"
-/bin/systemctl restart fail2ban
+#[[ "${DEBUG}" > 0 ]] && >&2 echo "restart fail2ban"
+#/bin/systemctl restart fail2ban
+
+# wait a second to avoid race condition with dhcpclient
+sleep 1
