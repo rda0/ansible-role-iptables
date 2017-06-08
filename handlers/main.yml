@@ -4,3 +4,5 @@
 
 - name: restore iptables
   command: /etc/iptables/iptables.sh
+  async: 10
+  poll: 1
