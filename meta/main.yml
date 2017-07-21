@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: inventory-check, tags: inventory-check }
+  - { role: common-handlers, tags: common-handlers }
