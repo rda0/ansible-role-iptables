@@ -15,82 +15,82 @@
 - name: create iptables config
   include: partials/deploy-template.yml
   with_items:
-    - src: iptables/iptables.conf
+    - src: iptables.conf
       dest: /etc/iptables/iptables.conf
       notify: restore iptables
-    - src: iptables/conf.nat.policy
+    - src: conf.nat.policy
       dest: /etc/iptables/conf.nat.policy
       notify: restore iptables
-    - src: iptables/conf.nat.rules
+    - src: conf.nat.rules
       dest: /etc/iptables/conf.nat.rules
       notify: restore iptables
-    - src: iptables/conf.filter.policy
+    - src: conf.filter.policy
       dest: /etc/iptables/conf.filter.policy
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.conntrack.sh
+    - src: conf.filter.rules.head.conntrack.sh
       dest: /etc/iptables/conf.filter.rules.head.conntrack.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.ipv4.lo.sh
+    - src: conf.filter.rules.head.ipv4.lo.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv4.lo.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.ipv6.lo.sh
+    - src: conf.filter.rules.head.ipv6.lo.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv6.lo.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.lo
+    - src: conf.filter.rules.head.lo
       dest: /etc/iptables/conf.filter.rules.head.lo
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.ipv4.icmp.sh
+    - src: conf.filter.rules.head.ipv4.icmp.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv4.icmp.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.ipv6.icmp.sh
+    - src: conf.filter.rules.head.ipv6.icmp.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv6.icmp.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.ratelimit.sh
+    - src: conf.filter.rules.head.ratelimit.sh
       dest: /etc/iptables/conf.filter.rules.head.ratelimit.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.body.sh
+    - src: conf.filter.rules.body.sh
       dest: /etc/iptables/conf.filter.rules.body.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.body.ipv4.sh
+    - src: conf.filter.rules.body.ipv4.sh
       dest: /etc/iptables/conf.filter.rules.body.ipv4.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.body.ipv6.sh
+    - src: conf.filter.rules.body.ipv6.sh
       dest: /etc/iptables/conf.filter.rules.body.ipv6.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.tail.sh
+    - src: conf.filter.rules.tail.sh
       dest: /etc/iptables/conf.filter.rules.tail.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.tail.ipv4.sh
+    - src: conf.filter.rules.tail.ipv4.sh
       dest: /etc/iptables/conf.filter.rules.tail.ipv4.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.tail.ipv6.sh
+    - src: conf.filter.rules.tail.ipv6.sh
       dest: /etc/iptables/conf.filter.rules.tail.ipv6.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.ipv4.private.sh
+    - src: conf.filter.rules.head.ipv4.private.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv4.private.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/conf.filter.rules.head.ipv6.private.sh
+    - src: conf.filter.rules.head.ipv6.private.sh
       dest: /etc/iptables/conf.filter.rules.head.ipv6.private.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/iptables.sh
+    - src: iptables.sh
       dest: /etc/iptables/iptables.sh
       mode: '0755'
       notify: restore iptables
-    - src: iptables/flush.sh
+    - src: flush.sh
       dest: /etc/iptables/flush.sh
       mode: '0755'
   loop_control:
@@ -109,10 +109,10 @@
 - name: create iptables syslog config
   include: partials/deploy-template.yml
   with_items:
-    - src: iptables/rsyslog.conf
+    - src: rsyslog.conf
       dest: /etc/rsyslog.d/iptables.conf
       notify: restart rsyslog
-    - src: iptables/logrotate.conf
+    - src: logrotate.conf
       dest: /etc/logrotate.d/iptables.conf
   loop_control:
     loop_var: file
