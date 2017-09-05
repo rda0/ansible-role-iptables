@@ -272,8 +272,15 @@ echo -ne '\nCOMMIT\n' >> "${UP6}"
 [[ "${DEBUG}" > 0 ]] && >&2 echo "load ipv6 rules: ${UP6}"
 /sbin/ip6tables-restore < "${UP6}"
 
-#[[ "${DEBUG}" > 0 ]] && >&2 echo "restart fail2ban"
-#/bin/systemctl restart fail2ban
-
 # wait a second to avoid race condition with dhcpclient
 sleep 1
+
+if [[ -x /usr/sbin/libvirtd ]]; then
+  [[ "${DEBUG}" > 0 ]] && >&2 echo "restart libvirtd"
+  /bin/systemctl restart libvirtd
+fi
+
+if [[ -x /usr/bin/fail2ban-client ]]; then
+  [[ "${DEBUG}" > 0 ]] && >&2 echo "restart fail2ban"
+  /bin/systemctl restart fail2ban
+fi
