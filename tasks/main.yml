@@ -13,7 +13,7 @@
   file: path=/etc/iptables state=directory
 
 - name: create iptables config
-  include: partials/deploy-template.yml
+  include_tasks: partials/deploy-template.yml
   with_items:
     - src: iptables.conf
       dest: /etc/iptables/iptables.conf
@@ -107,7 +107,7 @@
   when: use_iptables|default(true)
 
 - name: create iptables syslog config
-  include: partials/deploy-template.yml
+  include_tasks: partials/deploy-template.yml
   with_items:
     - src: rsyslog.conf
       dest: /etc/rsyslog.d/iptables.conf
