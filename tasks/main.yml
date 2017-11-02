@@ -90,8 +90,11 @@
       dest: /etc/iptables/iptables.sh
       mode: '0755'
       notify: restore iptables
-    - src: flush.sh
-      dest: /etc/iptables/flush.sh
+    - src: iptables-flush-allow.sh
+      dest: /etc/iptables/iptables-flush-allow.sh
+      mode: '0755'
+    - src: ipset-flush.sh
+      dest: /etc/iptables/ipset-flush.sh
       mode: '0755'
   loop_control:
     loop_var: file
