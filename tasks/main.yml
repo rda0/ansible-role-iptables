@@ -96,6 +96,11 @@
     - src: ipset-flush.sh
       dest: /etc/iptables/ipset-flush.sh
       mode: '0755'
+    - src: iptables.service
+      dest: /etc/systemd/system/iptables.service
+      owner: root
+      group: root
+      mode: '0644'
   loop_control:
     loop_var: file
   when: use_iptables|default(true)
@@ -107,7 +112,7 @@
     owner: root
     group: root
     state: link
-  when: use_iptables|default(true)
+  when: use_iptables|default(true) and not use_iptables_systemd|default(false)
 
 - name: create iptables syslog config
   include_tasks: partials/deploy-template.yml
@@ -120,6 +125,13 @@
   loop_control:
     loop_var: file
   when: use_iptables|default(true)
+
+- name: enable iptables.service
+  systemd:
+    enabled: yes
+    daemon_reload: yes
+    name: iptables
+  when: use_iptables|default(true) and use_iptables_systemd|default(false)
 
 #- name: custom network
 #  lineinfile:

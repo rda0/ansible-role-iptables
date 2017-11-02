@@ -1,0 +1,11 @@
+[Unit]
+Description=Initializes iptables rules
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/etc/iptables/iptables.sh
+
+[Install]
+WantedBy=multi-user.targe
