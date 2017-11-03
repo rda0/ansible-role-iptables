@@ -4,8 +4,9 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=no
-ExecStart=/etc/iptables/iptables.sh
+ExecStart=/etc/iptables/iptables-start.sh
+ExecStop=/etc/iptables/iptables-stop.sh
+RemainAfterExit=yes
 
 [Install]
-WantedBy=multi-user.targe
+WantedBy=multi-user.target

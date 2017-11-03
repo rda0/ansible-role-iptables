@@ -96,6 +96,12 @@
     - src: ipset-flush.sh
       dest: /etc/iptables/ipset-flush.sh
       mode: '0755'
+    - src: iptables-start.sh
+      dest: /etc/iptables/iptables-start.sh
+      mode: '0755'
+    - src: iptables-stop.sh
+      dest: /etc/iptables/iptables-stop.sh
+      mode: '0755'
     - src: iptables.service
       dest: /etc/systemd/system/iptables.service
       owner: root
