@@ -7,7 +7,7 @@
   with_items:
     - ipset
     - iprange
-    - xtables-addons-common
+#    - xtables-addons-common
 
 - name: create directory /etc/iptables
   file: path=/etc/iptables state=directory
