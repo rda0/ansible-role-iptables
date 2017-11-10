@@ -8,42 +8,45 @@ UP6=/etc/iptables/up.ipv6.rules
 
 # flush iptables (required to destroy sets)
 [[ "${DEBUG}" > 0 ]] && >&2 echo "flush iptables"
-/sbin/iptables -P INPUT DROP
-/sbin/iptables -P OUTPUT DROP
-/sbin/iptables -P FORWARD DROP
-/sbin/iptables -F
-/sbin/iptables -X
-/sbin/iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-/sbin/iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
-/sbin/ip6tables -P INPUT DROP
-/sbin/ip6tables -P OUTPUT DROP
-/sbin/ip6tables -P FORWARD DROP
-/sbin/ip6tables -F
-/sbin/ip6tables -X
-/sbin/ip6tables -A INPUT -p tcp --dport 22 -j ACCEPT
-/sbin/ip6tables -A OUTPUT -p tcp --sport 22 -j ACCEPT
-#[[ "${DEBUG}" > 0 ]] && >&2 echo "restart fail2ban"
-#/bin/systemctl restart fail2ban
+"${CONF}/iptables-flush-allow.sh"
+#/sbin/iptables -P INPUT DROP
+#/sbin/iptables -P OUTPUT DROP
+#/sbin/iptables -P FORWARD DROP
+#/sbin/iptables -F
+#/sbin/iptables -X
+#/sbin/iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+#/sbin/iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
+#/sbin/ip6tables -P INPUT DROP
+#/sbin/ip6tables -P OUTPUT DROP
+#/sbin/ip6tables -P FORWARD DROP
+#/sbin/ip6tables -F
+#/sbin/ip6tables -X
+#/sbin/ip6tables -A INPUT -p tcp --dport 22 -j ACCEPT
+#/sbin/ip6tables -A OUTPUT -p tcp --sport 22 -j ACCEPT
 
 # make ipset config
 
-# destroy lists first
-[[ "${DEBUG}" > 0 ]] && >&2 echo "destroy ipsets"
-/sbin/ipset -q destroy trusted
-/sbin/ipset -q destroy trusted6
-# destroy sets
-/sbin/ipset -q destroy admin
-/sbin/ipset -q destroy server
-/sbin/ipset -q destroy custom
-/sbin/ipset -q destroy trustednet
-/sbin/ipset -q destroy private
-/sbin/ipset -q destroy private-except
-/sbin/ipset -q destroy admin6
-/sbin/ipset -q destroy server6
-/sbin/ipset -q destroy custom6
-/sbin/ipset -q destroy trustednet6
-/sbin/ipset -q destroy private6
-/sbin/ipset -q destroy private6-except
+# flush ipsets
+[[ "${DEBUG}" > 0 ]] && >&2 echo "flush ipsets"
+"${CONF}/ipset-flush.sh"
+## destroy lists first
+#[[ "${DEBUG}" > 0 ]] && >&2 echo "destroy ipsets"
+#/sbin/ipset -q destroy trusted
+#/sbin/ipset -q destroy trusted6
+## destroy sets
+#/sbin/ipset -q destroy admin
+#/sbin/ipset -q destroy server
+#/sbin/ipset -q destroy custom
+#/sbin/ipset -q destroy trustednet
+#/sbin/ipset -q destroy private
+#/sbin/ipset -q destroy private-except
+#/sbin/ipset -q destroy admin6
+#/sbin/ipset -q destroy server6
+#/sbin/ipset -q destroy custom6
+#/sbin/ipset -q destroy trustednet6
+#/sbin/ipset -q destroy private6
+#/sbin/ipset -q destroy private6-except
+
 # create sets
 [[ "${DEBUG}" > 0 ]] && >&2 echo "create ipsets"
 /sbin/ipset create admin            hash:ip  family inet
