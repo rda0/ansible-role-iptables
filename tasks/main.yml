@@ -111,15 +111,6 @@
     loop_var: file
   when: use_iptables|default(true)
 
-- name: create link /etc/network/if-pre-up.d/iptables
-  file:
-    src: /etc/iptables/iptables.sh
-    dest: /etc/network/if-pre-up.d/iptables
-    owner: root
-    group: root
-    state: link
-  when: use_iptables|default(true) and not use_iptables_systemd|default(false)
-
 - name: create iptables syslog config
   include_tasks: partials/deploy-template.yml
   with_items:
@@ -132,16 +123,31 @@
     loop_var: file
   when: use_iptables|default(true)
 
-- name: enable iptables.service
+- name: enable via symlink in /etc/network/if-pre-up.d/iptables
+  file:
+    src: /etc/iptables/iptables.sh
+    dest: /etc/network/if-pre-up.d/iptables
+    owner: root
+    group: root
+    state: link
+  when: use_iptables|default(true) and not use_iptables_systemd|default(false)
+
+- name: enable systemd iptables.service
   systemd:
     enabled: yes
     daemon_reload: yes
     name: iptables
   when: use_iptables|default(true) and use_iptables_systemd|default(false)
 
-#- name: custom network
-#  lineinfile:
-#    dest: /etc/iptables/iptables.conf
-#    regexp: "^NET4_CUSTOM=\"{{ iptables_net4_custom }}\""
-#    line: "NET4_CUSTOM=\"{{ iptables_net4_custom }}\""
-#  when: use_iptables|default(true) and iptables_net4_custom is defined
+- name: remove link /etc/network/if-pre-up.d/iptables
+  file:
+    dest: /etc/network/if-pre-up.d/iptables
+    state: absent
+  when: use_iptables|default(true) and use_iptables_systemd|default(false)
+
+- name: disable systemd iptables.service
+  systemd:
+    enabled: no
+    daemon_reload: yes
+    name: iptables
+  when: use_iptables|default(true) and not use_iptables_systemd|default(false)

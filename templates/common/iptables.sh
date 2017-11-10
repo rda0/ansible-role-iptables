@@ -33,14 +33,12 @@ UP6=/etc/iptables/up.ipv6.rules
 /sbin/ipset -q destroy trusted6
 # destroy sets
 /sbin/ipset -q destroy admin
-/sbin/ipset -q destroy update
 /sbin/ipset -q destroy server
 /sbin/ipset -q destroy custom
 /sbin/ipset -q destroy trustednet
 /sbin/ipset -q destroy private
 /sbin/ipset -q destroy private-except
 /sbin/ipset -q destroy admin6
-/sbin/ipset -q destroy update6
 /sbin/ipset -q destroy server6
 /sbin/ipset -q destroy custom6
 /sbin/ipset -q destroy trustednet6
@@ -49,7 +47,6 @@ UP6=/etc/iptables/up.ipv6.rules
 # create sets
 [[ "${DEBUG}" > 0 ]] && >&2 echo "create ipsets"
 /sbin/ipset create admin            hash:ip  family inet
-/sbin/ipset create update           hash:ip  family inet
 /sbin/ipset create server           hash:net family inet
 /sbin/ipset create custom           hash:net family inet
 /sbin/ipset create trustednet       hash:net family inet
@@ -57,7 +54,6 @@ UP6=/etc/iptables/up.ipv6.rules
 /sbin/ipset create private-except   hash:net family inet
 /sbin/ipset create trusted          list:set
 /sbin/ipset create admin6           hash:ip  family inet6
-/sbin/ipset create update6          hash:ip  family inet6
 /sbin/ipset create server6          hash:net family inet6
 /sbin/ipset create custom6          hash:net family inet6
 /sbin/ipset create trustednet6      hash:net family inet6
@@ -83,13 +79,6 @@ if [ -n "${NET4_ADMIN}" ] ; then
   for IP in ${NET4_ADMIN}; do
     [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add admin ${IP}"
     /sbin/ipset add admin "${IP}"
-  done
-fi
-
-if [ -n "${NET4_UPDATE}" ] ; then
-  for IP in ${NET4_UPDATE}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add update ${IP}"
-    /sbin/ipset add update "${IP}"
   done
 fi
 
@@ -142,13 +131,6 @@ if [ -n "${NET6_ADMIN}" ] ; then
   for IP in ${NET6_ADMIN}; do
     [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add admin6 ${IP}"
     /sbin/ipset add admin6 "${IP}"
-  done
-fi
-
-if [ -n "${NET6_UPDATE}" ] ; then
-  for IP in ${NET6_UPDATE}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add update6 ${IP}"
-    /sbin/ipset add update6 "${IP}"
   done
 fi
 

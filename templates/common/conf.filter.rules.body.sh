@@ -126,37 +126,6 @@ if [ -n "${O_UDP_SRV}" ] ; then
   done
 fi
 
-# Update
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules: Update"
-
-if [ -n "${I_TCP_UPD}" ] ; then
-  for PORT in ${I_TCP_UPD}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A INPUT -m set --match-set ${SET_UPD} src -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
-    echo "-A INPUT -m set --match-set ${SET_UPD} src -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
-  done
-fi
-
-if [ -n "${I_UDP_UPD}" ] ; then
-  for PORT in ${I_UDP_UPD}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A INPUT -m set --match-set ${SET_UPD} src -p udp --dport ${PORT} -j ACCEPT"
-    echo "-A INPUT -m set --match-set ${SET_UPD} src -p udp --dport ${PORT} -j ACCEPT"
-  done
-fi
-
-if [ -n "${O_TCP_UPD}" ] ; then
-  for PORT in ${O_TCP_UPD}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_UPD} dst -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
-    echo "-A OUTPUT -m set --match-set ${SET_UPD} dst -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
-  done
-fi
-
-if [ -n "${O_UDP_UPD}" ] ; then
-  for PORT in ${O_UDP_UPD}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_UPD} dst -p udp --dport "${PORT}" -j ACCEPT"
-    echo "-A OUTPUT -m set --match-set ${SET_UPD} dst -p udp --dport "${PORT}" -j ACCEPT"
-  done
-fi
-
 # Admin
 [[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules: Admin"
 
