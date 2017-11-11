@@ -1,0 +1,6 @@
+export SET_ADM="admin4"
+export SET_SRV="server4"
+export SET_CUS="custom4"
+export SET_TRU="trusted4" # includes: Trusted, Server, Admin
+
+. "${CONF}/conf.filter.rules.body"

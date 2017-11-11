@@ -1,0 +1,4 @@
+#!/bin/sh
+
+. /usr/sbin/iptables-flush
+. /usr/sbin/ipset-flush

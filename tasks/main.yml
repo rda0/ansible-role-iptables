@@ -5,149 +5,108 @@
     update_cache: yes
     cache_valid_time: 3600
   with_items:
+    - iptables
     - ipset
     - iprange
-#    - xtables-addons-common
+  when: use_iptables|default(true)
 
 - name: create directory /etc/iptables
   file: path=/etc/iptables state=directory
-
-- name: create iptables config
-  include_tasks: partials/deploy-template.yml
-  with_items:
-    - src: iptables.conf
-      dest: /etc/iptables/iptables.conf
-      notify: restore iptables
-    - src: conf.nat.policy
-      dest: /etc/iptables/conf.nat.policy
-      notify: restore iptables
-    - src: conf.nat.rules
-      dest: /etc/iptables/conf.nat.rules
-      notify: restore iptables
-    - src: conf.filter.policy
-      dest: /etc/iptables/conf.filter.policy
-      notify: restore iptables
-    - src: conf.filter.rules.head.conntrack.sh
-      dest: /etc/iptables/conf.filter.rules.head.conntrack.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.head.ipv4.lo.sh
-      dest: /etc/iptables/conf.filter.rules.head.ipv4.lo.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.head.ipv6.lo.sh
-      dest: /etc/iptables/conf.filter.rules.head.ipv6.lo.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.head.lo
-      dest: /etc/iptables/conf.filter.rules.head.lo
-      notify: restore iptables
-    - src: conf.filter.rules.head.ipv4.icmp.sh
-      dest: /etc/iptables/conf.filter.rules.head.ipv4.icmp.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.head.ipv6.icmp.sh
-      dest: /etc/iptables/conf.filter.rules.head.ipv6.icmp.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.head.ratelimit.sh
-      dest: /etc/iptables/conf.filter.rules.head.ratelimit.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.body.sh
-      dest: /etc/iptables/conf.filter.rules.body.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.body.ipv4.sh
-      dest: /etc/iptables/conf.filter.rules.body.ipv4.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.body.ipv6.sh
-      dest: /etc/iptables/conf.filter.rules.body.ipv6.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.tail.sh
-      dest: /etc/iptables/conf.filter.rules.tail.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.tail.ipv4.sh
-      dest: /etc/iptables/conf.filter.rules.tail.ipv4.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.tail.ipv6.sh
-      dest: /etc/iptables/conf.filter.rules.tail.ipv6.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.head.ipv4.private.sh
-      dest: /etc/iptables/conf.filter.rules.head.ipv4.private.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: conf.filter.rules.head.ipv6.private.sh
-      dest: /etc/iptables/conf.filter.rules.head.ipv6.private.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: iptables.sh
-      dest: /etc/iptables/iptables.sh
-      mode: '0755'
-      notify: restore iptables
-    - src: iptables-flush-allow.sh
-      dest: /etc/iptables/iptables-flush-allow.sh
-      mode: '0755'
-    - src: ipset-flush.sh
-      dest: /etc/iptables/ipset-flush.sh
-      mode: '0755'
-    - src: iptables-start.sh
-      dest: /etc/iptables/iptables-start.sh
-      mode: '0755'
-    - src: iptables-stop.sh
-      dest: /etc/iptables/iptables-stop.sh
-      mode: '0755'
-    - src: iptables.service
-      dest: /etc/systemd/system/iptables.service
-      owner: root
-      group: root
-      mode: '0644'
-  loop_control:
-    loop_var: file
   when: use_iptables|default(true)
 
-- name: create iptables syslog config
-  include_tasks: partials/deploy-template.yml
+- name: create iptables config
+  template:
+    src: '{{ item }}'
+    dest: '/etc/iptables/{{ item }}'
+    mode: '0644'
+  notify: restart iptables
   with_items:
-    - src: rsyslog.conf
-      dest: /etc/rsyslog.d/iptables.conf
-      notify: restart rsyslog
-    - src: logrotate.conf
-      dest: /etc/logrotate.d/iptables.conf
-  loop_control:
-    loop_var: file
+    - iptables.conf
+    - conf.raw.policy
+    - conf.raw.rules
+    - conf.nat.policy
+    - conf.nat.rules
+    - conf.mangle.policy
+    - conf.mangle.rules
+    - conf.filter.policy
+    - conf.filter.rules.head.lo
+    - conf.filter.rules.head.conntrack
+    - conf.filter.rules.head.ratelimit
+    - conf.filter.rules.head.ipv4.icmp
+    - conf.filter.rules.head.ipv4.lo
+    - conf.filter.rules.head.ipv4.private
+    - conf.filter.rules.head.ipv6.icmp
+    - conf.filter.rules.head.ipv6.lo
+    - conf.filter.rules.head.ipv6.private
+    - conf.filter.rules.body
+    - conf.filter.rules.body.ipv4
+    - conf.filter.rules.body.ipv6
+    - conf.filter.rules.tail
+    - conf.filter.rules.tail.ipv4
+    - conf.filter.rules.tail.ipv6
+  when: use_iptables|default(true)
+
+- name: create iptables scripts
+  template:
+    src: '{{ item }}'
+    dest: '/usr/sbin/{{ item }}'
+    mode: '0755'
+  notify: restart iptables
+  with_items:
+    - iptables-reload
+    - iptables-start
+    - iptables-stop
+    - iptables-flush
+    - ipset-flush
+  when: use_iptables|default(true)
+
+- name: create iptables systemd service file
+  template:
+    src: iptables.service
+    dest: /etc/systemd/system/iptables.service
+    owner: root
+    group: root
+    mode: '0644'
+  when: use_iptables|default(true)
+
+- name: create iptables rsyslog config
+  template:
+    src: rsyslog.conf
+    dest: /etc/rsyslog.d/iptables.conf
+  notify: restart rsyslog
+  when: use_iptables|default(true)
+
+- name: create iptables logrotate config
+  template:
+    src: logrotate.conf
+    dest: /etc/logrotate.d/iptables.conf
   when: use_iptables|default(true)
 
 - name: enable via symlink in /etc/network/if-pre-up.d/iptables
   file:
-    src: /etc/iptables/iptables.sh
+    src: /usr/sbin/iptables-reload
     dest: /etc/network/if-pre-up.d/iptables
     owner: root
     group: root
     state: link
-  when: use_iptables|default(true) and not use_iptables_systemd|default(false)
+  when: use_iptables|default(true) and not use_iptables_systemd|default(true)
 
 - name: enable systemd iptables.service
   systemd:
     enabled: yes
     daemon_reload: yes
     name: iptables
-  when: use_iptables|default(true) and use_iptables_systemd|default(false)
+  when: use_iptables|default(true) and use_iptables_systemd|default(true)
 
 - name: remove link /etc/network/if-pre-up.d/iptables
   file:
     dest: /etc/network/if-pre-up.d/iptables
     state: absent
-  when: use_iptables|default(true) and use_iptables_systemd|default(false)
+  when: use_iptables|default(true) and use_iptables_systemd|default(true)
 
 - name: disable systemd iptables.service
   systemd:
     enabled: no
     daemon_reload: yes
     name: iptables
-  when: use_iptables|default(true) and not use_iptables_systemd|default(false)
+  when: use_iptables|default(true) and not use_iptables_systemd|default(true)

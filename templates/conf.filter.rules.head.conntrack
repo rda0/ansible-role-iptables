@@ -1,7 +1,3 @@
-#!/bin/bash
-
-. /etc/iptables/iptables.conf
-
 echo -e "# Enable statefull rules (after that, only need to allow NEW conections)"
 echo -e "-A INPUT   -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT"
 echo -e "-A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT"

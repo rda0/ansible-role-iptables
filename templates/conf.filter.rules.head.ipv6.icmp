@@ -1,7 +1,3 @@
-#!/bin/bash
-
-. /etc/iptables/iptables.conf
-
 echo -e "## Allow icmp (ping)"
 echo -e "# Allow inbound ping from trusted networks"
 if [ "${ALLOW_PING_INET}" == "true" ]; then

@@ -1,7 +1,3 @@
-#!/bin/bash
-
-. /etc/iptables/iptables.conf
-
 # Internet (default)
 [[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules: Internet (default)"
 
@@ -45,7 +41,7 @@ fi
 
 if [ -n "${I_UDP}" ] ; then
   for PORT in ${I_UDP}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "A INPUT -m set --match-set ${SET_CUS} src -p udp --dport ${PORT} -j ACCEPT"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A INPUT -m set --match-set ${SET_CUS} src -p udp --dport ${PORT} -j ACCEPT"
     echo "-A INPUT -m set --match-set ${SET_CUS} src -p udp --dport ${PORT} -j ACCEPT"
   done
 fi
