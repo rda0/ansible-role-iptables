@@ -29,6 +29,32 @@ if [ -n "${O_UDP_INET}" ] ; then
   done
 fi
 
+if [ -n "${F_TCP_INET}" ] ; then
+  for FORWARD in ${F_TCP_INET}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi
+
+if [ -n "${F_UDP_INET}" ] ; then
+  for FORWARD in ${F_UDP_INET}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi
+
 # Network (custom), host specific
 [[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules: Network (custom), host specific"
 
@@ -57,6 +83,32 @@ if [ -n "${O_UDP}" ] ; then
   for PORT in ${O_UDP}; do
     [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p udp --dport "${PORT}" -j ACCEPT"
     echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p udp --dport "${PORT}" -j ACCEPT"
+  done
+fi
+
+if [ -n "${F_TCP}" ] ; then
+  for FORWARD in ${F_TCP}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_CUS} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_CUS} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi
+
+if [ -n "${F_UDP}" ] ; then
+  for FORWARD in ${F_UDP}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_CUS} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_CUS} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
   done
 fi
 
@@ -91,6 +143,32 @@ if [ -n "${O_UDP_TRU}" ] ; then
   done
 fi
 
+if [ -n "${F_TCP_TRU}" ] ; then
+  for FORWARD in ${F_TCP_TRU}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_TRU} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_TRU} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi
+
+if [ -n "${F_UDP_TRU}" ] ; then
+  for FORWARD in ${F_UDP_TRU}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_TRU} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_TRU} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi
+
 # Network (server)
 [[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules: Network (server)"
 
@@ -119,6 +197,32 @@ if [ -n "${O_UDP_SRV}" ] ; then
   for PORT in ${O_UDP_SRV}; do
     [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p udp --dport "${PORT}" -j ACCEPT"
     echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p udp --dport "${PORT}" -j ACCEPT"
+  done
+fi
+
+if [ -n "${F_TCP_SRV}" ] ; then
+  for FORWARD in ${F_TCP_SRV}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_SRV} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_SRV} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi
+
+if [ -n "${F_UDP_SRV}" ] ; then
+  for FORWARD in ${F_UDP_SRV}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_SRV} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_SRV} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
   done
 fi
 
@@ -153,3 +257,28 @@ if [ -n "${O_UDP_ADM}" ] ; then
   done
 fi
 
+if [ -n "${F_TCP_ADM}" ] ; then
+  for FORWARD in ${F_TCP_ADM}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_ADM} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_ADM} src -m conntrack --ctstate NEW -i ${INTERFACE} -p tcp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi
+
+if [ -n "${F_UDP_ADM}" ] ; then
+  for FORWARD in ${F_UDP_ADM}; do
+    INTERFACE=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f3)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A FORWARD -m set --match-set ${SET_ADM} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+    echo "-4 -A FORWARD -m set --match-set ${SET_ADM} src -i ${INTERFACE} -p udp -d ${TARGET_IP} --dport ${TARGET_PORT} -j ACCEPT"
+  done
+fi

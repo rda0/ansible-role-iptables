@@ -1,0 +1,31 @@
+[[ "${DEBUG}" > 0 ]] && >&2 echo "generate nat rules: ipv4"
+
+if [ -n "${F_TCP_NAT4}" ] ; then
+  for FORWARD in ${F_TCP_NAT4}; do
+    INTERFACE=""
+    PORT=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    PORT="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f3)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f4)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A PREROUTING -p tcp -i ${INTERFACE} --dport ${PORT} -j DNAT --to-destination ${TARGET_IP}:${TARGET_PORT}"
+    echo "-4 -A PREROUTING -p tcp -i ${INTERFACE} --dport ${PORT} -j DNAT --to-destination ${TARGET_IP}:${TARGET_PORT}"
+  done
+fi
+
+if [ -n "${F_UDP_NAT4}" ] ; then
+  for FORWARD in ${F_UDP_NAT4}; do
+    INTERFACE=""
+    PORT=""
+    TARGET_IP=""
+    TARGET_PORT=""
+    INTERFACE="$(echo ${FORWARD} | cut -d':' -f1)"
+    PORT="$(echo ${FORWARD} | cut -d':' -f2)"
+    TARGET_IP="$(echo ${FORWARD} | cut -d':' -f3)"
+    TARGET_PORT="$(echo ${FORWARD} | cut -d':' -f4)"
+    [[ "${DEBUG}" > 1 ]] && >&2 echo "-4 -A PREROUTING -p udp -i ${INTERFACE} --dport ${PORT} -j DNAT --to-destination ${TARGET_IP}:${TARGET_PORT}"
+    echo "-4 -A PREROUTING -p udp -i ${INTERFACE} --dport ${PORT} -j DNAT --to-destination ${TARGET_IP}:${TARGET_PORT}"
+  done
+fi

@@ -91,6 +91,23 @@
     state: link
   when: use_iptables|default(true) and not use_iptables_systemd|default(true)
 
+- name: create directory /etc/systemd/system/libvirtd.service.d
+  file:
+    path: /etc/systemd/system/libvirtd.service.d
+    state: directory
+  when: use_iptables|default(true) and use_iptables_systemd|default(true)
+
+- name: create systemd libvirtd.service override
+  template:
+    src: libvirtd.service.override.conf
+    dest: /etc/systemd/system/libvirtd.service.d/override.conf
+  when: use_iptables|default(true) and use_iptables_systemd|default(true)
+  register: systemd_libvirtd_service_override
+
+- name: systemd daemon-reload for libvirtd.service override
+  command: /bin/systemctl daemon-reload
+  when: use_iptables|default(true) and use_iptables_systemd|default(true) and systemd_libvirtd_service_override.changed
+
 - name: enable systemd iptables.service
   systemd:
     enabled: yes
