@@ -5,5 +5,7 @@ if [ "${ALLOW_PING_INET}" == "true" ]; then
 else
   echo -e "-A INPUT  -p icmp --icmp-type echo-request -m set --match-set trusted4 src -j ACCEPT"
 fi
+{% if not iptables_policy_o_accept|default(false) %}
 echo -e "# Allow outbound ping to internet"
 echo -e "-A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT"
+{% endif %}

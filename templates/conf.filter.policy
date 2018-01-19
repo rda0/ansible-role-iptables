@@ -1,4 +1,8 @@
 *filter
 :INPUT DROP
 :FORWARD DROP
+{% if iptables_policy_o_accept|default(false) %}
+:OUTPUT ACCEPT
+{% else %}
 :OUTPUT DROP
+{% endif %}

@@ -15,6 +15,7 @@ if [ -n "${I_UDP_INET}" ] ; then
   done
 fi
 
+{% if not iptables_policy_o_accept|default(false) %}
 if [ -n "${O_TCP_INET}" ] ; then
   for PORT in ${O_TCP_INET}; do
     [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
@@ -28,6 +29,7 @@ if [ -n "${O_UDP_INET}" ] ; then
     echo "-A OUTPUT -p udp --dport "${PORT}" -j ACCEPT"
   done
 fi
+{% endif %}
 
 if [ -n "${F_TCP_INET}" ] ; then
   for FORWARD in ${F_TCP_INET}; do
@@ -72,6 +74,7 @@ if [ -n "${I_UDP}" ] ; then
   done
 fi
 
+{% if not iptables_policy_o_accept|default(false) %}
 if [ -n "${O_TCP}" ] ; then
   for PORT in ${O_TCP}; do
     [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
@@ -85,6 +88,7 @@ if [ -n "${O_UDP}" ] ; then
     echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p udp --dport "${PORT}" -j ACCEPT"
   done
 fi
+{% endif %}
 
 if [ -n "${F_TCP}" ] ; then
   for FORWARD in ${F_TCP}; do
@@ -129,6 +133,7 @@ if [ -n "${I_UDP_TRU}" ] ; then
   done
 fi
 
+{% if not iptables_policy_o_accept|default(false) %}
 if [ -n "${O_TCP_TRU}" ] ; then
   for PORT in ${O_TCP_TRU}; do
     [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_TRU} dst -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
@@ -142,6 +147,7 @@ if [ -n "${O_UDP_TRU}" ] ; then
     echo "-A OUTPUT -m set --match-set ${SET_TRU} dst -p udp --dport "${PORT}" -j ACCEPT"
   done
 fi
+{% endif %}
 
 if [ -n "${F_TCP_TRU}" ] ; then
   for FORWARD in ${F_TCP_TRU}; do
@@ -186,6 +192,7 @@ if [ -n "${I_UDP_SRV}" ] ; then
   done
 fi
 
+{% if not iptables_policy_o_accept|default(false) %}
 if [ -n "${O_TCP_SRV}" ] ; then
   for PORT in ${O_TCP_SRV}; do
     [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
@@ -199,6 +206,7 @@ if [ -n "${O_UDP_SRV}" ] ; then
     echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p udp --dport "${PORT}" -j ACCEPT"
   done
 fi
+{% endif %}
 
 if [ -n "${F_TCP_SRV}" ] ; then
   for FORWARD in ${F_TCP_SRV}; do
@@ -243,6 +251,7 @@ if [ -n "${I_UDP_ADM}" ] ; then
   done
 fi
 
+{% if not iptables_policy_o_accept|default(false) %}
 if [ -n "${O_TCP_ADM}" ] ; then
   for PORT in ${O_TCP_ADM}; do
     [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_ADM} dst -p tcp --dport ${PORT} -m conntrack --ctstate NEW -j ACCEPT"
@@ -256,6 +265,7 @@ if [ -n "${O_UDP_ADM}" ] ; then
     echo "-A OUTPUT -m set --match-set ${SET_ADM} dst -p udp --dport "${PORT}" -j ACCEPT"
   done
 fi
+{% endif %}
 
 if [ -n "${F_TCP_ADM}" ] ; then
   for FORWARD in ${F_TCP_ADM}; do
