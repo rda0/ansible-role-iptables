@@ -1,4 +1,0 @@
-{% if not iptables_policy_o_accept|default(false) %}
-# Allow local outbound loopback
--A OUTPUT  -o lo -j ACCEPT
-{% endif %}

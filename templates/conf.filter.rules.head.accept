@@ -4,11 +4,12 @@ echo -e "-A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT"
 {% if not iptables_policy_o_accept|default(false) %}
 echo -e "-A OUTPUT  -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT"
 {% endif %}
-echo -e "# Drop invalid state packets"
-echo -e "-A INPUT   -m conntrack --ctstate INVALID -j DROP"
-echo -e "-A FORWARD -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
-echo -e "-A FORWARD -m conntrack --ctstate INVALID -j DROP"
+
+echo -e "# Allow local inbound loopback"
+echo -e "-4 -A INPUT   -i lo -s 127.0.0.0/8 -d 127.0.0.0/8 -j ACCEPT"
+echo -e "-6 -A INPUT   -i lo -s ::1/128 -d ::1/128 -j ACCEPT"
+
 {% if not iptables_policy_o_accept|default(false) %}
-echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
-echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
+echo -e "# Allow local outbound loopback"
+echo -e "-A OUTPUT  -o lo -j ACCEPT"
 {% endif %}

@@ -1,0 +1,18 @@
+echo -e "# Drop invalid state packets"
+echo -e "-A INPUT   -m conntrack --ctstate INVALID -j DROP"
+echo -e "-A FORWARD -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
+echo -e "-A FORWARD -m conntrack --ctstate INVALID -j DROP"
+{% if not iptables_policy_o_accept|default(false) %}
+echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
+echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
+{% endif %}
+
+echo -e "# Drop invalid inbound loopback"
+echo -e "-4 -A INPUT ! -i lo -d 127.0.0.0/8 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-d-lo: \""
+echo -e "-4 -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP"
+echo -e "-4 -A INPUT ! -i lo -s 127.0.0.0/8 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-s-lo: \""
+echo -e "-4 -A INPUT ! -i lo -s 127.0.0.0/8 -j DROP"
+echo -e "-6 -A INPUT ! -i lo -d ::1/128 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-d-lo: \""
+echo -e "-6 -A INPUT ! -i lo -d ::1/128 -j DROP"
+echo -e "-6 -A INPUT ! -i lo -s ::1/128 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-s-lo: \""
+echo -e "-6 -A INPUT ! -i lo -s ::1/128 -j DROP"

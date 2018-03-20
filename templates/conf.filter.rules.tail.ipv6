@@ -1,3 +1,0 @@
-export SET_TRU="trusted6"
-
-. "${CONF}/conf.filter.rules.tail"

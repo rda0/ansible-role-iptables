@@ -1,0 +1,29 @@
+echo -e "-N i-priv"
+echo -e "-N f-priv"
+
+echo -e "# Anything coming from the Internet should have a real Internet address"
+
+for IF in ${IF_EXT}; do
+  echo -e "-4 -A INPUT   -m set --match-set private4 src -i ${IF} -j i-priv"
+  echo -e "-4 -A FORWARD -m set --match-set private4 src -i ${IF} -j f-priv"
+  echo -e "-6 -A INPUT   -m set --match-set private6 src -i ${IF} -j i-priv"
+  echo -e "-6 -A FORWARD -m set --match-set private6 src -i ${IF} -j f-priv"
+done
+
+for IF in ${IF_BR_EXT}; do
+  echo -e "-4 -A INPUT   -m set --match-set private4 src -m physdev --physdev-in ${IF} -j i-priv"
+  echo -e "-4 -A FORWARD -m set --match-set private4 src -m physdev --physdev-in ${IF} -j f-priv"
+  echo -e "-6 -A INPUT   -m set --match-set private6 src -m physdev --physdev-in ${IF} -j i-priv"
+  echo -e "-6 -A FORWARD -m set --match-set private6 src -m physdev --physdev-in ${IF} -j f-priv"
+done
+
+echo -e "# Everything in the private address range gets dropped, except our allowed networks"
+
+echo -e "-4 -A i-priv  -m set ! --match-set private-except4 src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-priv: \""
+echo -e "-4 -A i-priv  -m set ! --match-set private-except4 src -j DROP"
+echo -e "-4 -A f-priv  -m set ! --match-set private-except4 src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-priv: \""
+echo -e "-4 -A f-priv  -m set ! --match-set private-except4 src -j DROP"
+echo -e "-6 -A i-priv  -m set ! --match-set private6-except src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-priv: \""
+echo -e "-6 -A i-priv  -m set ! --match-set private6-except src -j DROP"
+echo -e "-6 -A f-priv  -m set ! --match-set private6-except src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-priv: \""
+echo -e "-6 -A f-priv  -m set ! --match-set private6-except src -j DROP"

@@ -9,12 +9,17 @@ for IF in ${IF_BR}; do
 done
 
 echo -e "-A FORWARD -j LOG ${LOG_OPTS} \"[ipt-f]: \""
+
 echo -e "# And finally rejected (trusted)"
-echo -e "-A INPUT   -m set --match-set ${SET_TRU} src -j REJECT"
+echo -e "-4 -A INPUT   -m set --match-set trusted4 src -j REJECT"
+echo -e "-6 -A INPUT   -m set --match-set trusted6 src -j REJECT"
 {% if not iptables_policy_o_accept|default(false) %}
-echo -e "-A OUTPUT  -m set --match-set ${SET_TRU} dst -j REJECT"
+echo -e "-4 -A OUTPUT  -m set --match-set trusted4 dst -j REJECT"
+echo -e "-6 -A OUTPUT  -m set --match-set trusted6 dst -j REJECT"
 {% endif %}
-echo -e "-A FORWARD -m set --match-set ${SET_TRU} src -j REJECT"
+echo -e "-4 -A FORWARD -m set --match-set trusted4 src -j REJECT"
+echo -e "-6 -A FORWARD -m set --match-set trusted6 src -j REJECT"
+
 echo -e "# Or finally dropped (internet)"
 echo -e "-A INPUT   -j DROP"
 {% if not iptables_policy_o_accept|default(false) %}
