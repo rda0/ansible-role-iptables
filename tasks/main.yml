@@ -76,10 +76,15 @@
     group: root
     mode: '0644'
 
+- name: 'remove obsolete rsyslog conf: /etc/rsyslog.d/iptables.conf TODO: remove'
+  file:
+    path: /etc/rsyslog.d/iptables.conf
+    state: absent
+
 - name: create iptables rsyslog config
   template:
     src: rsyslog.conf
-    dest: /etc/rsyslog.d/iptables.conf
+    dest: /etc/rsyslog.d/00-iptables.conf
   notify: restart rsyslog
 
 - name: create iptables logrotate config
