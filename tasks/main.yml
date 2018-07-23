@@ -37,23 +37,23 @@
     - conf.filter.rules.body.ipv6
     - conf.filter.rules.tail
 
-- name: remove obsolete config
-  file:
-    path: '/etc/iptables/{{ item }}'
-    state: absent
-  with_items:
-    - conf.filter.rules.head.lo
-    - conf.filter.rules.head.ipv4.icmp
-    - conf.filter.rules.head.ipv4.lo
-    - conf.filter.rules.head.ipv4.private
-    - conf.filter.rules.head.ipv6.icmp
-    - conf.filter.rules.head.ipv6.lo
-    - conf.filter.rules.head.ipv6.private
-    - conf.filter.rules.head.conntrack
-    - conf.filter.rules.tail.ipv4
-    - conf.filter.rules.tail.ipv6
-    - up.ipv4.rules
-    - up.ipv6.rules
+#- name: remove obsolete config
+#  file:
+#    path: '/etc/iptables/{{ item }}'
+#    state: absent
+#  with_items:
+#    - conf.filter.rules.head.lo
+#    - conf.filter.rules.head.ipv4.icmp
+#    - conf.filter.rules.head.ipv4.lo
+#    - conf.filter.rules.head.ipv4.private
+#    - conf.filter.rules.head.ipv6.icmp
+#    - conf.filter.rules.head.ipv6.lo
+#    - conf.filter.rules.head.ipv6.private
+#    - conf.filter.rules.head.conntrack
+#    - conf.filter.rules.tail.ipv4
+#    - conf.filter.rules.tail.ipv6
+#    - up.ipv4.rules
+#    - up.ipv6.rules
 
 - name: create iptables scripts
   template:
