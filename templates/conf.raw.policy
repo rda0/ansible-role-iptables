@@ -1,3 +1,5 @@
-*raw
-:PREROUTING ACCEPT
-:OUTPUT ACCEPT
+#!/bin/bash
+
+echo -e "*raw"
+echo -e ":PREROUTING ACCEPT"
+echo -e ":OUTPUT ACCEPT"

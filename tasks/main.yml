@@ -21,27 +21,26 @@
   with_items:
     - iptables.conf
     - conf.raw.policy
-    - conf.raw.rules
+    - conf.raw.rule
     - conf.nat.policy
-    - conf.nat.rules
+    - conf.nat.rule
     - conf.mangle.policy
-    - conf.mangle.rules
+    - conf.mangle.rule
     - conf.filter.policy
-    - conf.filter.rules.head.accept
-    - conf.filter.rules.head.invalid
-    - conf.filter.rules.head.private
-    - conf.filter.rules.head.icmp
-    - conf.filter.rules.head.ratelimit
-    - conf.filter.rules.body
-    - conf.filter.rules.body.ipv4
-    - conf.filter.rules.body.ipv6
-    - conf.filter.rules.tail
+    - conf.filter.rule
+    - conf.filter.rule.head.accept
+    - conf.filter.rule.head.invalid
+    - conf.filter.rule.head.private
+    - conf.filter.rule.head.icmp
+    - conf.filter.rule.head.ratelimit
+    - conf.filter.rule.body
+    - conf.filter.rule.tail
 
-#- name: remove obsolete config
-#  file:
-#    path: '/etc/iptables/{{ item }}'
-#    state: absent
-#  with_items:
+- name: remove obsolete config
+  file:
+    path: '/etc/iptables/{{ item }}'
+    state: absent
+  with_items:
 #    - conf.filter.rules.head.lo
 #    - conf.filter.rules.head.ipv4.icmp
 #    - conf.filter.rules.head.ipv4.lo
@@ -54,6 +53,20 @@
 #    - conf.filter.rules.tail.ipv6
 #    - up.ipv4.rules
 #    - up.ipv6.rules
+    - conf.raw.rules
+    - conf.nat.rules
+    - conf.mangle.rules
+    - conf.filter.rules.head.accept
+    - conf.filter.rules.head.invalid
+    - conf.filter.rules.head.private
+    - conf.filter.rules.head.icmp
+    - conf.filter.rules.head.ratelimit
+    - conf.filter.rules.body
+    - conf.filter.rules.body.ipv4
+    - conf.filter.rules.body.ipv6
+    - conf.filter.rules.tail
+    - up.rules.ipv4
+    - up.rules.ipv6
 
 - name: create iptables scripts
   template:

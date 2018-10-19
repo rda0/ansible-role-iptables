@@ -1,0 +1,48 @@
+#!/bin/bash
+
+[[ "${IF_BR}" != "" ]] && echo -e "# Allow bridge traffic"
+for IF in ${IF_BR}; do
+  echo -e "-A FORWARD -i ${IF} -o ${IF} -j ACCEPT"
+done
+
+echo -e "# All other connections are registered in syslog"
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A INPUT   -j LOG ${LOG_OPTS} \"[ipt-i]: \""
+{% if not iptables_policy_o_accept|default(false) %}
+[[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -j LOG ${LOG_OPTS} \"[ipt-o]: \""
+{% endif %}
+[[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A FORWARD -j LOG ${LOG_OPTS} \"[ipt-f]: \""
+
+# echo -e "# And finally rejected (trusted)"
+# echo -e "-4 -A INPUT   -m set --match-set trusted4 src -j REJECT"
+# echo -e "-6 -A INPUT   -m set --match-set trusted6 src -j REJECT"
+# {% if not iptables_policy_o_accept|default(false) %}
+# echo -e "-4 -A OUTPUT  -m set --match-set trusted4 dst -j REJECT"
+# echo -e "-6 -A OUTPUT  -m set --match-set trusted6 dst -j REJECT"
+# {% endif %}
+# echo -e "-4 -A FORWARD -m set --match-set trusted4 src -j REJECT"
+# echo -e "-6 -A FORWARD -m set --match-set trusted6 src -j REJECT"
+# 
+# echo -e "# Or finally dropped (internet)"
+# echo -e "-A INPUT   -j DROP"
+# {% if not iptables_policy_o_accept|default(false) %}
+# echo -e "-A OUTPUT  -j DROP"
+# {% endif %}
+# echo -e "-A FORWARD -j DROP"
+
+echo -e "# And finally rejected (rfc compliant)"
+echo -e "-4 -A INPUT   -p tcp -j REJECT --reject-with tcp-reset"
+echo -e "-4 -A INPUT   -p udp -j REJECT --reject-with icmp-port-unreachable"
+echo -e "-4 -A INPUT          -j REJECT --reject-with icmp-proto-unreachable"
+echo -e "-6 -A INPUT   -p tcp -j REJECT --reject-with tcp-reset"
+echo -e "-6 -A INPUT   -p udp -j REJECT --reject-with icmp6-port-unreachable"
+echo -e "-6 -A INPUT          -j REJECT --reject-with icmp6-adm-prohibited"
+{% if not iptables_policy_o_accept|default(false) %}
+echo -e "-4 -A OUTPUT  -p tcp -j REJECT --reject-with tcp-reset"
+echo -e "-4 -A OUTPUT  -p udp -j REJECT --reject-with icmp-port-unreachable"
+echo -e "-4 -A OUTPUT         -j REJECT --reject-with icmp-proto-unreachable"
+echo -e "-6 -A OUTPUT  -p tcp -j REJECT --reject-with tcp-reset"
+echo -e "-6 -A OUTPUT  -p udp -j REJECT --reject-with icmp6-port-unreachable"
+echo -e "-6 -A OUTPUT         -j REJECT --reject-with icmp6-adm-prohibited"
+{% endif %}
+echo -e "-4 -A FORWARD        -j REJECT --reject-with icmp-host-unreachable"
+echo -e "-6 -A FORWARD        -j REJECT --reject-with icmp6-addr-unreachable"

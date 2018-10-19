@@ -1,8 +1,10 @@
-*filter
-:INPUT DROP
-:FORWARD DROP
+#!/bin/bash
+
+echo -e "*filter"
+echo -e ":INPUT DROP"
+echo -e ":FORWARD DROP"
 {% if iptables_policy_o_accept|default(false) %}
-:OUTPUT ACCEPT
+echo -e ":OUTPUT ACCEPT"
 {% else %}
-:OUTPUT DROP
+echo -e ":OUTPUT DROP"
 {% endif %}
