@@ -3,8 +3,8 @@
 echo -e "*filter"
 echo -e ":INPUT DROP"
 echo -e ":FORWARD DROP"
-{% if iptables_policy_o_accept|default(false) %}
-echo -e ":OUTPUT ACCEPT"
-{% else %}
-echo -e ":OUTPUT DROP"
-{% endif %}
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  echo -e ":OUTPUT DROP"
+else
+  echo -e ":OUTPUT ACCEPT"
+fi

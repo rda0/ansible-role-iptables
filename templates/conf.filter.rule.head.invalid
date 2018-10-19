@@ -1,14 +1,14 @@
 #!/bin/bash
 
 echo -e "# Drop invalid state packets"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A INPUT   -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-i]invalid: \""
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A INPUT   -m conntrack --ctstate INVALID -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]invalid: \""
 echo -e "-A INPUT   -m conntrack --ctstate INVALID -j DROP"
 [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A FORWARD -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
 echo -e "-A FORWARD -m conntrack --ctstate INVALID -j DROP"
-{% if not iptables_policy_o_accept|default(false) %}
-[[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
-echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
-{% endif %}
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
+  echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
+fi
 
 # echo -e "# Drop invalid inbound loopback"
 # [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-4 -A INPUT ! -i lo -d 127.0.0.0/8 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-d-lo: \""

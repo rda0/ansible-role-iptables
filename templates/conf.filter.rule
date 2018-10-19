@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo -e "-N i-deny"
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  echo -e "-N o-deny"
+fi
+echo -e "-N f-deny"
+
 [[ "${DEBUG}" > 0 ]] && >&2 echo "generate rule conf.filter.rule.head.accept"
 . "${CONF}/conf.filter.rule.head.accept"
 echo -ne '\n' >> "${UP}${V}"

@@ -5,44 +5,63 @@ for IF in ${IF_BR}; do
   echo -e "-A FORWARD -i ${IF} -o ${IF} -j ACCEPT"
 done
 
+echo -e "# Limit logging of BROADCAST, MULTICAST, ANYCAST address targets and DROP silently"
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type BROADCAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]broadcast: \""
+echo -e "-4 -A INPUT   -m addrtype --dst-type BROADCAST -j DROP"
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type MULTICAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]multicast: \""
+echo -e "-4 -A INPUT   -m addrtype --dst-type MULTICAST -j DROP"
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type ANYCAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]anycast: \""
+echo -e "-4 -A INPUT   -m addrtype --dst-type ANYCAST -j DROP"
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-6 -A INPUT   -m addrtype --dst-type MULTICAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]multicast: \""
+echo -e "-6 -A INPUT   -m addrtype --dst-type MULTICAST -j DROP"
+
 echo -e "# All other connections are registered in syslog"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A INPUT   -j LOG ${LOG_OPTS} \"[ipt-i]: \""
-{% if not iptables_policy_o_accept|default(false) %}
-[[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -j LOG ${LOG_OPTS} \"[ipt-o]: \""
-{% endif %}
-[[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A FORWARD -j LOG ${LOG_OPTS} \"[ipt-f]: \""
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A INPUT   -m limit --limit 10/s --limit-burst 100 -j LOG ${LOG_OPTS} \"[ipt-i]deny: \""
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -j LOG ${LOG_OPTS} \"[ipt-o]deny: \""
+fi
+[[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A FORWARD -j LOG ${LOG_OPTS} \"[ipt-f]deny: \""
 
 # echo -e "# And finally rejected (trusted)"
 # echo -e "-4 -A INPUT   -m set --match-set trusted4 src -j REJECT"
 # echo -e "-6 -A INPUT   -m set --match-set trusted6 src -j REJECT"
-# {% if not iptables_policy_o_accept|default(false) %}
-# echo -e "-4 -A OUTPUT  -m set --match-set trusted4 dst -j REJECT"
-# echo -e "-6 -A OUTPUT  -m set --match-set trusted6 dst -j REJECT"
-# {% endif %}
+# if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+#   echo -e "-4 -A OUTPUT  -m set --match-set trusted4 dst -j REJECT"
+#   echo -e "-6 -A OUTPUT  -m set --match-set trusted6 dst -j REJECT"
+# fi
 # echo -e "-4 -A FORWARD -m set --match-set trusted4 src -j REJECT"
 # echo -e "-6 -A FORWARD -m set --match-set trusted6 src -j REJECT"
-# 
-# echo -e "# Or finally dropped (internet)"
-# echo -e "-A INPUT   -j DROP"
-# {% if not iptables_policy_o_accept|default(false) %}
-# echo -e "-A OUTPUT  -j DROP"
-# {% endif %}
-# echo -e "-A FORWARD -j DROP"
 
-echo -e "# And finally rejected (rfc compliant)"
-echo -e "-4 -A INPUT   -p tcp -j REJECT --reject-with tcp-reset"
-echo -e "-4 -A INPUT   -p udp -j REJECT --reject-with icmp-port-unreachable"
-echo -e "-4 -A INPUT          -j REJECT --reject-with icmp-proto-unreachable"
-echo -e "-6 -A INPUT   -p tcp -j REJECT --reject-with tcp-reset"
-echo -e "-6 -A INPUT   -p udp -j REJECT --reject-with icmp6-port-unreachable"
-echo -e "-6 -A INPUT          -j REJECT --reject-with icmp6-adm-prohibited"
-{% if not iptables_policy_o_accept|default(false) %}
-echo -e "-4 -A OUTPUT  -p tcp -j REJECT --reject-with tcp-reset"
-echo -e "-4 -A OUTPUT  -p udp -j REJECT --reject-with icmp-port-unreachable"
-echo -e "-4 -A OUTPUT         -j REJECT --reject-with icmp-proto-unreachable"
-echo -e "-6 -A OUTPUT  -p tcp -j REJECT --reject-with tcp-reset"
-echo -e "-6 -A OUTPUT  -p udp -j REJECT --reject-with icmp6-port-unreachable"
-echo -e "-6 -A OUTPUT         -j REJECT --reject-with icmp6-adm-prohibited"
-{% endif %}
-echo -e "-4 -A FORWARD        -j REJECT --reject-with icmp-host-unreachable"
-echo -e "-6 -A FORWARD        -j REJECT --reject-with icmp6-addr-unreachable"
+echo -e "# And finally denied"
+echo -e "-A INPUT   -j i-deny"
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  echo -e "-A OUTPUT  -j o-deny"
+fi
+echo -e "-A FORWARD -j f-deny"
+
+if [[ "${DENY_TARGET_DROP}" != "true" ]]; then
+  echo -e "# Reject rfc compliant"
+  echo -e "-4 -A i-deny -p tcp -j REJECT --reject-with tcp-reset"
+  echo -e "-4 -A i-deny -p udp -j REJECT --reject-with icmp-port-unreachable"
+  echo -e "-4 -A i-deny        -j REJECT --reject-with icmp-proto-unreachable"
+  echo -e "-6 -A i-deny -p tcp -j REJECT --reject-with tcp-reset"
+  echo -e "-6 -A i-deny -p udp -j REJECT --reject-with icmp6-port-unreachable"
+  echo -e "-6 -A i-deny        -j REJECT --reject-with icmp6-adm-prohibited"
+  if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+    echo -e "-4 -A o-deny -p tcp -j REJECT --reject-with tcp-reset"
+    echo -e "-4 -A o-deny -p udp -j REJECT --reject-with icmp-port-unreachable"
+    echo -e "-4 -A o-deny        -j REJECT --reject-with icmp-proto-unreachable"
+    echo -e "-6 -A o-deny -p tcp -j REJECT --reject-with tcp-reset"
+    echo -e "-6 -A o-deny -p udp -j REJECT --reject-with icmp6-port-unreachable"
+    echo -e "-6 -A o-deny        -j REJECT --reject-with icmp6-adm-prohibited"
+  fi
+  echo -e "-4 -A f-deny        -j REJECT --reject-with icmp-host-unreachable"
+  echo -e "-6 -A f-deny        -j REJECT --reject-with icmp6-addr-unreachable"
+else
+  echo -e "# Drop hard"
+  echo -e "-A i-deny   -j DROP"
+  if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+    echo -e "-A o-deny   -j DROP"
+  fi
+  echo -e "-A f-deny   -j DROP"
+fi

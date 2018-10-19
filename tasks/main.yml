@@ -67,6 +67,7 @@
     - conf.filter.rules.tail
     - up.rules.ipv4
     - up.rules.ipv6
+    - up.rules.ipv
 
 - name: create iptables scripts
   template:

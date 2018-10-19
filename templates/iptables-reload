@@ -2,7 +2,7 @@
 
 CONF=/etc/iptables
 SBIN=/usr/sbin
-UP="${CONF}/up.rules.ipv"
+UP="${CONF}/up.rules"
 
 . "${CONF}/iptables.conf"
 

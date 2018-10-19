@@ -22,21 +22,21 @@ if [ -n "${I_UDP_INET}" ] ; then
   done
 fi
 
-{% if not iptables_policy_o_accept|default(false) %}
-if [ -n "${O_TCP_INET}" ] ; then
-  for PORT in ${O_TCP_INET}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-A OUTPUT -p tcp --dport ${PORT} -j ACCEPT"
-  done
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  if [ -n "${O_TCP_INET}" ] ; then
+    for PORT in ${O_TCP_INET}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-A OUTPUT -p tcp --dport ${PORT} -j ACCEPT"
+    done
+  fi
+  
+  if [ -n "${O_UDP_INET}" ] ; then
+    for PORT in ${O_UDP_INET}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -p udp --dport "${PORT}" -j ACCEPT"
+      echo "-A OUTPUT -p udp --dport "${PORT}" -j ACCEPT"
+    done
+  fi
 fi
-
-if [ -n "${O_UDP_INET}" ] ; then
-  for PORT in ${O_UDP_INET}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -p udp --dport "${PORT}" -j ACCEPT"
-    echo "-A OUTPUT -p udp --dport "${PORT}" -j ACCEPT"
-  done
-fi
-{% endif %}
 
 if [ -n "${F_TCP_INET}" ] ; then
   for FORWARD in ${F_TCP_INET}; do
@@ -83,23 +83,23 @@ if [ -n "${I_UDP}" ] ; then
   done
 fi
 
-{% if not iptables_policy_o_accept|default(false) %}
-if [ -n "${O_TCP}" ] ; then
-  for PORT in ${O_TCP}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_CUS}4 dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_CUS}6 dst -p tcp --dport ${PORT} -j ACCEPT"
-  done
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  if [ -n "${O_TCP}" ] ; then
+    for PORT in ${O_TCP}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_CUS}4 dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_CUS}6 dst -p tcp --dport ${PORT} -j ACCEPT"
+    done
+  fi
+  
+  if [ -n "${O_UDP}" ] ; then
+    for PORT in ${O_UDP}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_CUS}4 dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_CUS}6 dst -p udp --dport ${PORT} -j ACCEPT"
+    done
+  fi
 fi
-
-if [ -n "${O_UDP}" ] ; then
-  for PORT in ${O_UDP}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_CUS} dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_CUS}4 dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_CUS}6 dst -p udp --dport ${PORT} -j ACCEPT"
-  done
-fi
-{% endif %}
 
 if [ -n "${F_TCP}" ] ; then
   for FORWARD in ${F_TCP}; do
@@ -146,23 +146,23 @@ if [ -n "${I_UDP_TRU}" ] ; then
   done
 fi
 
-{% if not iptables_policy_o_accept|default(false) %}
-if [ -n "${O_TCP_TRU}" ] ; then
-  for PORT in ${O_TCP_TRU}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_TRU} dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_TRU}4 dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_TRU}6 dst -p tcp --dport ${PORT} -j ACCEPT"
-  done
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  if [ -n "${O_TCP_TRU}" ] ; then
+    for PORT in ${O_TCP_TRU}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_TRU} dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_TRU}4 dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_TRU}6 dst -p tcp --dport ${PORT} -j ACCEPT"
+    done
+  fi
+  
+  if [ -n "${O_UDP_TRU}" ] ; then
+    for PORT in ${O_UDP_TRU}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_TRU} dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_TRU}4 dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_TRU}6 dst -p udp --dport ${PORT} -j ACCEPT"
+    done
+  fi
 fi
-
-if [ -n "${O_UDP_TRU}" ] ; then
-  for PORT in ${O_UDP_TRU}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_TRU} dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_TRU}4 dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_TRU}6 dst -p udp --dport ${PORT} -j ACCEPT"
-  done
-fi
-{% endif %}
 
 if [ -n "${F_TCP_TRU}" ] ; then
   for FORWARD in ${F_TCP_TRU}; do
@@ -209,23 +209,23 @@ if [ -n "${I_UDP_SRV}" ] ; then
   done
 fi
 
-{% if not iptables_policy_o_accept|default(false) %}
-if [ -n "${O_TCP_SRV}" ] ; then
-  for PORT in ${O_TCP_SRV}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_SRV}4 dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_SRV}6 dst -p tcp --dport ${PORT} -j ACCEPT"
-  done
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  if [ -n "${O_TCP_SRV}" ] ; then
+    for PORT in ${O_TCP_SRV}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_SRV}4 dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_SRV}6 dst -p tcp --dport ${PORT} -j ACCEPT"
+    done
+  fi
+  
+  if [ -n "${O_UDP_SRV}" ] ; then
+    for PORT in ${O_UDP_SRV}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_SRV}4 dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_SRV}6 dst -p udp --dport ${PORT} -j ACCEPT"
+    done
+  fi
 fi
-
-if [ -n "${O_UDP_SRV}" ] ; then
-  for PORT in ${O_UDP_SRV}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_SRV} dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_SRV}4 dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_SRV}6 dst -p udp --dport ${PORT} -j ACCEPT"
-  done
-fi
-{% endif %}
 
 if [ -n "${F_TCP_SRV}" ] ; then
   for FORWARD in ${F_TCP_SRV}; do
@@ -272,23 +272,23 @@ if [ -n "${I_UDP_ADM}" ] ; then
   done
 fi
 
-{% if not iptables_policy_o_accept|default(false) %}
-if [ -n "${O_TCP_ADM}" ] ; then
-  for PORT in ${O_TCP_ADM}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_ADM} dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_ADM}4 dst -p tcp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_ADM}6 dst -p tcp --dport ${PORT} -j ACCEPT"
-  done
+if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  if [ -n "${O_TCP_ADM}" ] ; then
+    for PORT in ${O_TCP_ADM}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_ADM} dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_ADM}4 dst -p tcp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_ADM}6 dst -p tcp --dport ${PORT} -j ACCEPT"
+    done
+  fi
+  
+  if [ -n "${O_UDP_ADM}" ] ; then
+    for PORT in ${O_UDP_ADM}; do
+      [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_ADM} dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-4 -A OUTPUT -m set --match-set ${SET_ADM}4 dst -p udp --dport ${PORT} -j ACCEPT"
+      echo "-6 -A OUTPUT -m set --match-set ${SET_ADM}6 dst -p udp --dport ${PORT} -j ACCEPT"
+    done
+  fi
 fi
-
-if [ -n "${O_UDP_ADM}" ] ; then
-  for PORT in ${O_UDP_ADM}; do
-    [[ "${DEBUG}" > 1 ]] && >&2 echo "-A OUTPUT -m set --match-set ${SET_ADM} dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-4 -A OUTPUT -m set --match-set ${SET_ADM}4 dst -p udp --dport ${PORT} -j ACCEPT"
-    echo "-6 -A OUTPUT -m set --match-set ${SET_ADM}6 dst -p udp --dport ${PORT} -j ACCEPT"
-  done
-fi
-{% endif %}
 
 if [ -n "${F_TCP_ADM}" ] ; then
   for FORWARD in ${F_TCP_ADM}; do
