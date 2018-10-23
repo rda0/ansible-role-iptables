@@ -5,7 +5,7 @@ echo -e "# Drop invalid state packets"
 echo -e "-A INPUT   -m conntrack --ctstate INVALID -j DROP"
 [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A FORWARD -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
 echo -e "-A FORWARD -m conntrack --ctstate INVALID -j DROP"
-if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+if [[ "${allow_o_any}" != "true" ]]; then
   [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
   echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
 fi

@@ -1,31 +1,31 @@
 #!/bin/bash
 
-echo -e "-N i-priv"
-echo -e "-N f-priv"
+echo -e "-N i-net-prv"
+echo -e "-N f-net-prv"
 
 echo -e "# Anything coming from the Internet should have a real Internet address"
 
-for IF in ${IF_EXT}; do
-  echo -e "-4 -A INPUT   -m set --match-set private4 src -i ${IF} -j i-priv"
-  echo -e "-4 -A FORWARD -m set --match-set private4 src -i ${IF} -j f-priv"
-  echo -e "-6 -A INPUT   -m set --match-set private6 src -i ${IF} -j i-priv"
-  echo -e "-6 -A FORWARD -m set --match-set private6 src -i ${IF} -j f-priv"
+for i in ${if_ext}; do
+  echo -e "-4 -A INPUT   -m set --match-set prv4 src -i ${i} -j i-net-prv"
+  echo -e "-4 -A FORWARD -m set --match-set prv4 src -i ${i} -j f-net-prv"
+  echo -e "-6 -A INPUT   -m set --match-set prv6 src -i ${i} -j i-net-prv"
+  echo -e "-6 -A FORWARD -m set --match-set prv6 src -i ${i} -j f-net-prv"
 done
 
-for IF in ${IF_BR_EXT}; do
-  echo -e "-4 -A INPUT   -m set --match-set private4 src -m physdev --physdev-in ${IF} -j i-priv"
-  echo -e "-4 -A FORWARD -m set --match-set private4 src -m physdev --physdev-in ${IF} -j f-priv"
-  echo -e "-6 -A INPUT   -m set --match-set private6 src -m physdev --physdev-in ${IF} -j i-priv"
-  echo -e "-6 -A FORWARD -m set --match-set private6 src -m physdev --physdev-in ${IF} -j f-priv"
+for i in ${if_br_ext}; do
+  echo -e "-4 -A INPUT   -m set --match-set prv4 src -m physdev --physdev-in ${i} -j i-net-prv"
+  echo -e "-4 -A FORWARD -m set --match-set prv4 src -m physdev --physdev-in ${i} -j f-net-prv"
+  echo -e "-6 -A INPUT   -m set --match-set prv6 src -m physdev --physdev-in ${i} -j i-net-prv"
+  echo -e "-6 -A FORWARD -m set --match-set prv6 src -m physdev --physdev-in ${i} -j f-net-prv"
 done
 
 echo -e "# Everything in the private address range gets denied, except our allowed networks"
 
-echo -e "-4 -A i-priv  -m set ! --match-set private-except4 src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-priv: \""
-echo -e "-4 -A i-priv  -m set ! --match-set private-except4 src -j i-deny"
-echo -e "-4 -A f-priv  -m set ! --match-set private-except4 src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-priv: \""
-echo -e "-4 -A f-priv  -m set ! --match-set private-except4 src -j f-deny"
-echo -e "-6 -A i-priv  -m set ! --match-set private6-except src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-priv: \""
-echo -e "-6 -A i-priv  -m set ! --match-set private6-except src -j i-deny"
-echo -e "-6 -A f-priv  -m set ! --match-set private6-except src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-priv: \""
-echo -e "-6 -A f-priv  -m set ! --match-set private6-except src -j f-deny"
+echo -e "-4 -A i-net-prv -m set ! --match-set prvcan4 src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-prv: \""
+echo -e "-4 -A i-net-prv -m set ! --match-set prvcan4 src -j i-deny"
+echo -e "-4 -A f-net-prv -m set ! --match-set prvcan4 src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-prv: \""
+echo -e "-4 -A f-net-prv -m set ! --match-set prvcan4 src -j f-deny"
+echo -e "-6 -A i-net-prv -m set ! --match-set prvcan6 src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-prv: \""
+echo -e "-6 -A i-net-prv -m set ! --match-set prvcan6 src -j i-deny"
+echo -e "-6 -A f-net-prv -m set ! --match-set prvcan6 src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-prv: \""
+echo -e "-6 -A f-net-prv -m set ! --match-set prvcan6 src -j f-deny"

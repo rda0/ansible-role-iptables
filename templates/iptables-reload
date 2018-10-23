@@ -18,182 +18,47 @@ UP="${CONF}/up.rules"
 
 # create sets
 [[ "${DEBUG}" > 0 ]] && >&2 echo "create ipsets"
-# ipv4 sets
-/sbin/ipset create admin4           hash:ip  family inet
-/sbin/ipset create server4          hash:net family inet
-/sbin/ipset create custom4          hash:net family inet
-/sbin/ipset create trustednet4      hash:net family inet
-/sbin/ipset create private4         hash:net family inet
-/sbin/ipset create private-except4  hash:net family inet
-/sbin/ipset create trusted4         list:set
-# ipv6 sets
-/sbin/ipset create admin6           hash:ip  family inet6
-/sbin/ipset create server6          hash:net family inet6
-/sbin/ipset create custom6          hash:net family inet6
-/sbin/ipset create trustednet6      hash:net family inet6
-/sbin/ipset create private6         hash:net family inet6
-/sbin/ipset create private6-except  hash:net family inet6
-/sbin/ipset create trusted6         list:set
-# ipv4 and ipv6 sets
-/sbin/ipset create trusted          list:set
 # dynamic blocking
-/sbin/ipset --exist create block-ssh4           hash:ip  family inet  timeout 3600
-/sbin/ipset --exist create block-ssh6           hash:ip  family inet6 timeout 3600
-/sbin/ipset --exist create block-ssh            list:set
-/sbin/ipset --exist create block-ssh-trusted4   hash:ip  family inet  timeout 600
-/sbin/ipset --exist create block-ssh-trusted6   hash:ip  family inet6 timeout 600
-/sbin/ipset --exist create block-ssh-trusted    list:set
-/sbin/ipset --exist add block-ssh block-ssh4
-/sbin/ipset --exist add block-ssh block-ssh6
-/sbin/ipset --exist add block-ssh-trusted block-ssh-trusted4
-/sbin/ipset --exist add block-ssh-trusted block-ssh-trusted6
+/sbin/ipset --exist create block-ssh-can4   hash:ip  family inet  timeout 600
+/sbin/ipset --exist create block-ssh-can6   hash:ip  family inet6 timeout 600
+/sbin/ipset --exist create block-ssh-can    list:set
+/sbin/ipset --exist create block-ssh-any4   hash:ip  family inet  timeout 3600
+/sbin/ipset --exist create block-ssh-any6   hash:ip  family inet6 timeout 3600
+/sbin/ipset --exist create block-ssh-any    list:set
+/sbin/ipset --exist add block-ssh-can block-ssh-can4
+/sbin/ipset --exist add block-ssh-can block-ssh-can6
+/sbin/ipset --exist add block-ssh-any block-ssh-any4
+/sbin/ipset --exist add block-ssh-any block-ssh-any6
 
-# fill ipv4 sets
-[[ "${DEBUG}" > 0 ]] && >&2 echo "fill ipv4 ipsets"
-
-if [ -n "${NET4_ADMIN}" ] ; then
-  for IP in ${NET4_ADMIN}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add admin4 ${IP}"
-    /sbin/ipset add admin4 "${IP}"
+for n in ${nets} prv prvcan; do
+  [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset create ${n} list:set"
+  /sbin/ipset create "${n}" list:set
+  for v in 4 6; do
+    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset create ${n}${v} hash:net"
+    [[ "${v}" == "4" ]] && /sbin/ipset create "${n}${v}" hash:net family inet
+    [[ "${v}" == "6" ]] && /sbin/ipset create "${n}${v}" hash:net family inet6
+    if [ -n "${net[${n}${v}]}" ]; then
+      for i in ${net[${n}${v}]}; do
+        [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add ${n}${v} ${i}"
+        /sbin/ipset add "${n}${v}" "${i}"
+      done
+    fi
+    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add ${n} ${n}${v}"
+    /sbin/ipset --exist add "${n}" "${n}${v}"
   done
-fi
+done
 
-if [ -n "${NET4_SERVER}" ] ; then
-  for NET in ${NET4_SERVER}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add server4 ${NET}"
-    /sbin/ipset add server4 "${NET}"
-  done
-fi
-
-if [ -n "${NET4_CUSTOM}" ] ; then
-  for NET in ${NET4_CUSTOM}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add custom4 ${NET}"
-    /sbin/ipset add custom4 "${NET}"
-  done
-fi
-
-if [ -n "${NET4_TRUSTED}" ] ; then
-  for NET in ${NET4_TRUSTED}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trustednet4 ${NET}"
-    /sbin/ipset add trustednet4 "${NET}"
-  done
-fi
-
-if [ -n "${NET4_PRIVATE}" ] ; then
-  for NET in ${NET4_PRIVATE}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add private4 ${NET}"
-    /sbin/ipset add private4 "${NET}"
-  done
-fi
-
-if [ -n "${NET4_PRIVATE_EXCEPT}" ] ; then
-  for NET in ${NET4_PRIVATE_EXCEPT}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add private-except4 ${NET}"
-    /sbin/ipset add private-except4 "${NET}"
-  done
-fi
-
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted4 trustednet4"
-/sbin/ipset --exist add trusted4 trustednet4
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted4 server4"
-/sbin/ipset --exist add trusted4 server4
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted4 admin4"
-/sbin/ipset --exist add trusted4 admin4
-
-# fill ipv6 sets
-[[ "${DEBUG}" > 0 ]] && >&2 echo "fill ipv6 ipsets"
-
-if [ -n "${NET6_ADMIN}" ] ; then
-  for IP in ${NET6_ADMIN}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add admin6 ${IP}"
-    /sbin/ipset add admin6 "${IP}"
-  done
-fi
-
-if [ -n "${NET6_SERVER}" ] ; then
-  for NET in ${NET6_SERVER}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add server6 ${NET}"
-    /sbin/ipset add server6 "${NET}"
-  done
-fi
-
-if [ -n "${NET6_CUSTOM}" ] ; then
-  for NET in ${NET6_CUSTOM}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add custom6 ${NET}"
-    /sbin/ipset add custom6 "${NET}"
-  done
-fi
-
-if [ -n "${NET6_TRUSTED}" ] ; then
-  for NET in ${NET6_TRUSTED}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trustednet6 ${NET}"
-    /sbin/ipset add trustednet6 "${NET}"
-  done
-fi
-
-if [ -n "${NET6_PRIVATE}" ] ; then
-  for NET in ${NET6_PRIVATE}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add private6 ${NET}"
-    /sbin/ipset add private6 "${NET}"
-  done
-fi
-
-if [ -n "${NET6_PRIVATE_EXCEPT}" ] ; then
-  for NET in ${NET6_PRIVATE_EXCEPT}; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add private6-except ${NET}"
-    /sbin/ipset add private6-except "${NET}"
-  done
-fi
-
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted6 trustednet6"
-/sbin/ipset --exist add trusted6 trustednet6
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted6 server6"
-/sbin/ipset --exist add trusted6 server6
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted6 admin6"
-/sbin/ipset --exist add trusted6 admin6
-
-
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted trustednet4"
-/sbin/ipset --exist add trusted trustednet4
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted trustednet6"
-/sbin/ipset --exist add trusted trustednet6
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted server4"
-/sbin/ipset --exist add trusted server4
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted server6"
-/sbin/ipset --exist add trusted server6
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted admin4"
-/sbin/ipset --exist add trusted admin4
-[[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add trusted admin6"
-/sbin/ipset --exist add trusted admin6
-
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.raw.policy"
-. "${CONF}/conf.raw.policy" > "${UP}"
-echo -ne '\n' >> "${UP}"
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.raw.rule"
-. "${CONF}/conf.raw.rule" >> "${UP}"
-echo -ne '\nCOMMIT\n\n' >> "${UP}"
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.nat.policy"
-. "${CONF}/conf.nat.policy" >> "${UP}"
-echo -ne '\n' >> "${UP}"
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.nat.rule"
-. "${CONF}/conf.nat.rule" >> "${UP}"
-echo -ne '\nCOMMIT\n\n' >> "${UP}"
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.mangle.policy"
-. "${CONF}/conf.mangle.policy" >> "${UP}"
-echo -ne '\n' >> "${UP}"
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.mangle.rule"
-. "${CONF}/conf.mangle.rule" >> "${UP}"
-echo -ne '\nCOMMIT\n\n' >> "${UP}"
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.filter.policy"
-. "${CONF}/conf.filter.policy" >> "${UP}"
-echo -ne '\n' >> "${UP}"
-[[ "${DEBUG}" > 0 ]] && >&2 echo "generate rules conf.filter.rule"
-. "${CONF}/conf.filter.rule" >> "${UP}"
-echo -ne '\n' >> "${UP}"
-echo -ne '\nCOMMIT\n' >> "${UP}"
+>"${UP}"
+for t in raw nat mangle filter; do
+  [[ "${DEBUG}" > 0 ]] && >&2 echo "generate table ${t}"
+  . "${CONF}/conf.${t}.policy" >> "${UP}"
+  echo -ne '\n' >> "${UP}"
+  . "${CONF}/conf.${t}.rule" >> "${UP}"
+  echo -ne '\nCOMMIT\n\n' >> "${UP}"
+done
 
 # restore rules
 [[ "${DEBUG}" > 0 ]] && >&2 echo "load ipv4 rules: ${UP}"
-/sbin/iptables-restore < "${UP}"
+#/sbin/iptables-restore < "${UP}"
 [[ "${DEBUG}" > 0 ]] && >&2 echo "load ipv6 rules: ${UP}"
-/sbin/ip6tables-restore < "${UP}"
+#/sbin/ip6tables-restore < "${UP}"

@@ -1,45 +1,45 @@
 #!/bin/bash
 
-[[ "${IF_BR}" != "" ]] && echo -e "# Allow bridge traffic"
-for IF in ${IF_BR}; do
-  echo -e "-A FORWARD -i ${IF} -o ${IF} -j ACCEPT"
+[[ "${if_br}" != "" ]] && echo -e "# Allow bridge traffic"
+for i in ${if_br}; do
+  echo -e "-A FORWARD -i ${i} -o ${i} -j ACCEPT"
 done
 
 echo -e "# Limit logging of BROADCAST, MULTICAST, ANYCAST address targets and DROP silently"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type BROADCAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]broadcast: \""
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type BROADCAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]bcast: \""
 echo -e "-4 -A INPUT   -m addrtype --dst-type BROADCAST -j DROP"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type MULTICAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]multicast: \""
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type MULTICAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]mcast: \""
 echo -e "-4 -A INPUT   -m addrtype --dst-type MULTICAST -j DROP"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type ANYCAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]anycast: \""
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-4 -A INPUT   -m addrtype --dst-type ANYCAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]acast: \""
 echo -e "-4 -A INPUT   -m addrtype --dst-type ANYCAST -j DROP"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-6 -A INPUT   -m addrtype --dst-type MULTICAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]multicast: \""
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-6 -A INPUT   -m addrtype --dst-type MULTICAST -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]mcast: \""
 echo -e "-6 -A INPUT   -m addrtype --dst-type MULTICAST -j DROP"
 
 echo -e "# All other connections are registered in syslog"
 [[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A INPUT   -m limit --limit 10/s --limit-burst 100 -j LOG ${LOG_OPTS} \"[ipt-i]deny: \""
-if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+if [[ "${allow_o_any}" != "true" ]]; then
   [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -j LOG ${LOG_OPTS} \"[ipt-o]deny: \""
 fi
 [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A FORWARD -j LOG ${LOG_OPTS} \"[ipt-f]deny: \""
 
 # echo -e "# And finally rejected (trusted)"
-# echo -e "-4 -A INPUT   -m set --match-set trusted4 src -j REJECT"
-# echo -e "-6 -A INPUT   -m set --match-set trusted6 src -j REJECT"
-# if [[ "${ALLOW_O_ANY}" != "true" ]]; then
-#   echo -e "-4 -A OUTPUT  -m set --match-set trusted4 dst -j REJECT"
-#   echo -e "-6 -A OUTPUT  -m set --match-set trusted6 dst -j REJECT"
+# echo -e "-4 -A INPUT   -m set --match-set can4 src -j REJECT"
+# echo -e "-6 -A INPUT   -m set --match-set can6 src -j REJECT"
+# if [[ "${allow_o_any}" != "true" ]]; then
+#   echo -e "-4 -A OUTPUT  -m set --match-set can4 dst -j REJECT"
+#   echo -e "-6 -A OUTPUT  -m set --match-set can6 dst -j REJECT"
 # fi
-# echo -e "-4 -A FORWARD -m set --match-set trusted4 src -j REJECT"
-# echo -e "-6 -A FORWARD -m set --match-set trusted6 src -j REJECT"
+# echo -e "-4 -A FORWARD -m set --match-set can4 src -j REJECT"
+# echo -e "-6 -A FORWARD -m set --match-set can6 src -j REJECT"
 
 echo -e "# And finally denied"
 echo -e "-A INPUT   -j i-deny"
-if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+if [[ "${allow_o_any}" != "true" ]]; then
   echo -e "-A OUTPUT  -j o-deny"
 fi
 echo -e "-A FORWARD -j f-deny"
 
-if [[ "${DENY_TARGET_DROP}" != "true" ]]; then
+if [[ "${deny_target_drop}" != "true" ]]; then
   echo -e "# Reject rfc compliant"
   echo -e "-4 -A i-deny -p tcp -j REJECT --reject-with tcp-reset"
   echo -e "-4 -A i-deny -p udp -j REJECT --reject-with icmp-port-unreachable"
@@ -47,7 +47,7 @@ if [[ "${DENY_TARGET_DROP}" != "true" ]]; then
   echo -e "-6 -A i-deny -p tcp -j REJECT --reject-with tcp-reset"
   echo -e "-6 -A i-deny -p udp -j REJECT --reject-with icmp6-port-unreachable"
   echo -e "-6 -A i-deny        -j REJECT --reject-with icmp6-adm-prohibited"
-  if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  if [[ "${allow_o_any}" != "true" ]]; then
     echo -e "-4 -A o-deny -p tcp -j REJECT --reject-with tcp-reset"
     echo -e "-4 -A o-deny -p udp -j REJECT --reject-with icmp-port-unreachable"
     echo -e "-4 -A o-deny        -j REJECT --reject-with icmp-proto-unreachable"
@@ -60,7 +60,7 @@ if [[ "${DENY_TARGET_DROP}" != "true" ]]; then
 else
   echo -e "# Drop hard"
   echo -e "-A i-deny   -j DROP"
-  if [[ "${ALLOW_O_ANY}" != "true" ]]; then
+  if [[ "${allow_o_any}" != "true" ]]; then
     echo -e "-A o-deny   -j DROP"
   fi
   echo -e "-A f-deny   -j DROP"

@@ -1,33 +1,33 @@
 #!/bin/bash
 
-if [[ "${RATE_LIMIT_SSH}" == "true" ]]; then
+if [[ "${rate_limit_ssh}" == "true" ]]; then
   echo -e "# Add chain for ssh rate limit"
-  echo -e "-N i-ssh-rate"
-  echo -e "-4 -A INPUT   -p tcp --dport 22 -m set ! --match-set admin4 src -j i-ssh-rate"
-  echo -e "-6 -A INPUT   -p tcp --dport 22 -m set ! --match-set admin6 src -j i-ssh-rate"
+  echo -e "-N i-ssh-lim"
+  echo -e "-4 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm4 src -j i-ssh-lim"
+  echo -e "-6 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm6 src -j i-ssh-lim"
 
   echo -e "# Track connection source in ssh-rate recent table"  
-  echo -e "-A i-ssh-rate -p tcp --dport 22 -m recent --set --name ssh-rate"
+  echo -e "-A i-ssh-lim  -m recent --set --name ssh-lim"
 
-  echo -e "# Check if source (trusted) exceeds threshold -> add to set block-ssh-trusted, log"
-  echo -e "-A i-ssh-rate -p tcp --dport 22 -m set   --match-set trusted src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_trusted_seconds|default('60') }} --hitcount {{ iptables_ssh_rate_trusted_hitcount|default('20') }} --name ssh-rate -j SET --add-set block-ssh-trusted src --exist"
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-ssh-rate -p tcp --dport 22 -m set   --match-set trusted src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_trusted_seconds|default('60') }} --hitcount {{ iptables_ssh_rate_trusted_hitcount|default('20') }} --name ssh-rate -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+  echo -e "# Check if source (can) exceeds threshold -> add to set block-ssh-can, log"
+  echo -e "-A i-ssh-lim  -m set   --match-set can src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_can_seconds|default('60') }} --hitcount {{ iptables_ssh_rate_can_hitcount|default('20') }} --name ssh-lim -j SET --add-set block-ssh-can src --exist"
+  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-ssh-lim  -m set   --match-set can src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_can_seconds|default('60') }} --hitcount {{ iptables_ssh_rate_can_hitcount|default('20') }} --name ssh-lim -j LOG ${LOG_OPTS} \"[ipt-i]ssh-lim: \""
 
-  echo -e "# Check if source (not trusted) exceeds threshold -> add to set block-ssh, log"
-  echo -e "-A i-ssh-rate -p tcp --dport 22 -m set ! --match-set trusted src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_seconds|default('120') }} --hitcount {{ iptables_ssh_rate_hitcount|default('5') }} --name ssh-rate -j SET --add-set block-ssh src --exist"
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-ssh-rate -p tcp --dport 22 -m set ! --match-set trusted src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_seconds|default('120') }} --hitcount {{ iptables_ssh_rate_hitcount|default('5') }} --name ssh-rate -j LOG ${LOG_OPTS} \"[ipt-i]ssh-rate: \""
+  echo -e "# Check if source (not can) exceeds threshold -> add to set block-ssh-any, log"
+  echo -e "-A i-ssh-lim  -m set ! --match-set can src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_any_seconds|default('120') }} --hitcount {{ iptables_ssh_rate_any_hitcount|default('5') }} --name ssh-lim -j SET --add-set block-ssh-any src --exist"
+  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-ssh-lim  -m set ! --match-set can src -m recent --rcheck --rttl --seconds {{ iptables_ssh_rate_any_seconds|default('120') }} --hitcount {{ iptables_ssh_rate_any_hitcount|default('5') }} --name ssh-lim -j LOG ${LOG_OPTS} \"[ipt-i]ssh-lim: \""
 
   echo -e "# Deny connections from sources in block-ssh* tables"
-  if [[ "${DENY_TARGET_DROP}" != "true" ]]; then
-    echo -e "-4 -A i-ssh-rate -m set --match-set block-ssh-trusted src -j REJECT --reject-with icmp-admin-prohibited"
-    echo -e "-6 -A i-ssh-rate -m set --match-set block-ssh-trusted src -j REJECT --reject-with icmp6-adm-prohibited"
-    echo -e "-4 -A i-ssh-rate -m set --match-set block-ssh         src -j REJECT --reject-with icmp-admin-prohibited"
-    echo -e "-6 -A i-ssh-rate -m set --match-set block-ssh         src -j REJECT --reject-with icmp6-adm-prohibited"
+  if [[ "${deny_target_drop}" != "true" ]]; then
+    echo -e "-4 -A i-ssh-lim -m set --match-set block-ssh-can src -j REJECT --reject-with icmp-admin-prohibited"
+    echo -e "-6 -A i-ssh-lim -m set --match-set block-ssh-can src -j REJECT --reject-with icmp6-adm-prohibited"
+    echo -e "-4 -A i-ssh-lim -m set --match-set block-ssh-any src -j REJECT --reject-with icmp-admin-prohibited"
+    echo -e "-6 -A i-ssh-lim -m set --match-set block-ssh-any src -j REJECT --reject-with icmp6-adm-prohibited"
   else
-    echo -e "-4 -A i-ssh-rate -m set --match-set block-ssh-trusted src -j REJECT --reject-with icmp-admin-prohibited"
-    echo -e "-6 -A i-ssh-rate -m set --match-set block-ssh-trusted src -j REJECT --reject-with icmp6-adm-prohibited"
-    echo -e "-4 -A i-ssh-rate -m set --match-set block-ssh         src -j DROP"
-    echo -e "-6 -A i-ssh-rate -m set --match-set block-ssh         src -j DROP"
+    echo -e "-4 -A i-ssh-lim -m set --match-set block-ssh-can src -j REJECT --reject-with icmp-admin-prohibited"
+    echo -e "-6 -A i-ssh-lim -m set --match-set block-ssh-can src -j REJECT --reject-with icmp6-adm-prohibited"
+    echo -e "-4 -A i-ssh-lim -m set --match-set block-ssh-any src -j DROP"
+    echo -e "-6 -A i-ssh-lim -m set --match-set block-ssh-any src -j DROP"
   fi
 fi
 
