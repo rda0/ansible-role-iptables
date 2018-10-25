@@ -20,6 +20,7 @@
   notify: restart iptables
   with_items:
     - iptables.conf
+    - conf.ipset
     - conf.raw.policy
     - conf.raw.rule
     - conf.nat.policy

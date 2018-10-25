@@ -1,31 +1,24 @@
 #!/bin/bash
 
-echo -e "-N i-net-prv"
-echo -e "-N f-net-prv"
-
-echo -e "# Anything coming from the Internet should have a real Internet address"
-
-for i in ${if_ext}; do
-  echo -e "-4 -A INPUT   -m set --match-set prv4 src -i ${i} -j i-net-prv"
-  echo -e "-4 -A FORWARD -m set --match-set prv4 src -i ${i} -j f-net-prv"
-  echo -e "-6 -A INPUT   -m set --match-set prv6 src -i ${i} -j i-net-prv"
-  echo -e "-6 -A FORWARD -m set --match-set prv6 src -i ${i} -j f-net-prv"
-done
-
-for i in ${if_br_ext}; do
-  echo -e "-4 -A INPUT   -m set --match-set prv4 src -m physdev --physdev-in ${i} -j i-net-prv"
-  echo -e "-4 -A FORWARD -m set --match-set prv4 src -m physdev --physdev-in ${i} -j f-net-prv"
-  echo -e "-6 -A INPUT   -m set --match-set prv6 src -m physdev --physdev-in ${i} -j i-net-prv"
-  echo -e "-6 -A FORWARD -m set --match-set prv6 src -m physdev --physdev-in ${i} -j f-net-prv"
-done
-
-echo -e "# Everything in the private address range gets denied, except our allowed networks"
-
-echo -e "-4 -A i-net-prv -m set ! --match-set prvcan4 src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-prv: \""
-echo -e "-4 -A i-net-prv -m set ! --match-set prvcan4 src -j i-deny"
-echo -e "-4 -A f-net-prv -m set ! --match-set prvcan4 src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-prv: \""
-echo -e "-4 -A f-net-prv -m set ! --match-set prvcan4 src -j f-deny"
-echo -e "-6 -A i-net-prv -m set ! --match-set prvcan6 src -j LOG ${LOG_OPTS} \"[ipt-i]any-s-prv: \""
-echo -e "-6 -A i-net-prv -m set ! --match-set prvcan6 src -j i-deny"
-echo -e "-6 -A f-net-prv -m set ! --match-set prvcan6 src -j LOG ${LOG_OPTS} \"[ipt-f]any-s-prv: \""
-echo -e "-6 -A f-net-prv -m set ! --match-set prvcan6 src -j f-deny"
+if [[ "${deny_i_prv}" == "true" ]]; then
+  for c in i f; do
+    [[ "${c}" == "i" ]] && chain="INPUT  " && l=2
+    [[ "${c}" == "f" ]] && chain="FORWARD" && l=1
+    echo -e "-N ${c}-net-prv"
+    echo -e "# Anything coming from the Internet should have a real Internet address"
+    for v in 4 6; do
+      for i in ${if_ext}; do
+        echo -e "-${v} -A ${chain} -m set --match-set prv${v} src -i ${i} -j ${c}-net-prv"
+      done
+      for i in ${if_br_ext}; do
+        echo -e "-${v} -A ${chain} -m set --match-set prv${v} src -m physdev --physdev-in ${i} -j ${c}-net-prv"
+      done
+      echo -e "# Everything in the private address range gets denied, except our allowed ipv${v} networks"
+      [[ "${LOG_LEVEL}" > ${l} ]] && echo -e "-${v} -A ${c}-net-prv -m set ! --match-set prvcan${v} src \
+                                              -m limit --limit ${log[${c}_any_s_prv_limit]} --limit-burst ${log[${c}_any_s_prv_burst]} \
+                                              -j LOG ${LOG_OPTS} \"[ipt-${c}]any-s-prv: \""
+      echo -e "-${v} -A ${c}-net-prv -m set ! --match-set prvcan${v} src -j ${c}-deny"
+    done
+    echo -e "-A ${c}-net-prv -j RETURN"
+  done
+fi

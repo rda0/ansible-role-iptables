@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# dynamic blocking (ban lists filled by rate limiter)
+for p in ${lim[ports]}; do
+  for n in ${lim[nets]}; do
+    /sbin/ipset --exist create ban-${p}-${n}4   hash:ip  family inet  timeout ${lim[${p}_${n}_time]}
+    /sbin/ipset --exist create ban-${p}-${n}6   hash:ip  family inet6 timeout ${lim[${p}_${n}_time]}
+    /sbin/ipset --exist create ban-${p}-${n}    list:set
+    /sbin/ipset --exist add    ban-${p}-${n}    ban-${p}-${n}4
+    /sbin/ipset --exist add    ban-${p}-${n}    ban-${p}-${n}6
+  done
+done
+
+# fill ipsets from config
+for n in ${nets} prv prvcan; do
+  [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset create ${n} list:set"
+  /sbin/ipset create "${n}" list:set
+  for v in 4 6; do
+    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset create ${n}${v} hash:net"
+    [[ "${v}" == "4" ]] && /sbin/ipset create "${n}${v}" hash:net family inet
+    [[ "${v}" == "6" ]] && /sbin/ipset create "${n}${v}" hash:net family inet6
+    if [ -n "${net[${n}${v}]}" ]; then
+      for i in ${net[${n}${v}]}; do
+        [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add ${n}${v} ${i}"
+        /sbin/ipset add "${n}${v}" "${i}"
+      done
+    fi
+    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add ${n} ${n}${v}"
+    /sbin/ipset --exist add "${n}" "${n}${v}"
+  done
+done

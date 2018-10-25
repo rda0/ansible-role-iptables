@@ -1,12 +1,18 @@
 #!/bin/bash
 
 echo -e "# Drop invalid state packets"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A INPUT   -m conntrack --ctstate INVALID -m limit --limit 1/h --limit-burst 10 -j LOG ${LOG_OPTS} \"[ipt-i]invalid: \""
+[[ "${LOG_LEVEL}" > 2 ]] && echo -e "-A INPUT   -m conntrack --ctstate INVALID \
+                                     -m limit --limit ${log[i_invalid_limit]} --limit-burst ${log[i_invalid_burst]} \
+                                     -j LOG ${LOG_OPTS} \"[ipt-i]invalid: \""
 echo -e "-A INPUT   -m conntrack --ctstate INVALID -j DROP"
-[[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A FORWARD -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
+[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A FORWARD -m conntrack --ctstate INVALID \
+                                     -m limit --limit ${log[f_invalid_limit]} --limit-burst ${log[f_invalid_burst]} \
+                                     -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
 echo -e "-A FORWARD -m conntrack --ctstate INVALID -j DROP"
 if [[ "${allow_o_any}" != "true" ]]; then
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
+  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -m conntrack --ctstate INVALID \
+                                       -m limit --limit ${log[o_invalid_limit]} --limit-burst ${log[o_invalid_burst]} \
+                                       -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
   echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
 fi
 

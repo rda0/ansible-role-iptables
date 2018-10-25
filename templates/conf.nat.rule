@@ -1,17 +1,18 @@
 #!/bin/bash
 
-for proto in tcp udp; do
-  if [ -n "${nat[4_f_${proto}]}" ]; then
-    for fw in ${nat[4_f_${proto}]}; do
-      interface=""
+for p in tcp udp; do
+  if [ -n "${nat[4_f_${p}]}" ]; then
+    for f in ${nat[4_f_${p}]}; do
+      i=""
       port=""
-      target_ip=""
-      target_port=""
-      interface="$(echo ${fw} | cut -d':' -f1)"
-      port="$(echo ${fw} | cut -d':' -f2)"
-      target_ip="$(echo ${fw} | cut -d':' -f3)"
-      target_port="$(echo ${fw} | cut -d':' -f4)"
-      echo "-4 -A PREROUTING -i ${interface} -p ${proto} -m ${proto} --dport ${port} -j DNAT --to-destination ${target_ip}:${target_port}"
+      dst_ip=""
+      dst_port=""
+      i="$(echo ${f} | cut -d'_' -f1)"
+      port="$(echo ${f} | cut -d'_' -f2)"
+      dst_ip="$(echo ${f} | cut -d'_' -f3)"
+      dst_port="$(echo ${f} | cut -d'_' -f4)"
+      echo -e "-4 -A PREROUTING -i ${i} -p ${p} -m ${p} --dport ${port} -j DNAT --to-destination ${dst_ip}:${dst_port}"
+      [[ "${DEBUG}" > 1 ]] && >&2 echo -e "-4 -A PREROUTING -i ${i} -p ${p} -m ${p} --dport ${port} -j DNAT --to-destination ${dst_ip}:${dst_port}"
     done
   fi
 done

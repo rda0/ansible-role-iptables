@@ -4,50 +4,22 @@ CONF=/etc/iptables
 SBIN=/usr/sbin
 UP="${CONF}/up.rules"
 
+# load config
 . "${CONF}/iptables.conf"
 
 # flush iptables (required to destroy sets)
 [[ "${DEBUG}" > 0 ]] && >&2 echo "flush iptables"
 . "${SBIN}/iptables-flush"
 
-# make ipset config
-
 # flush ipsets
 [[ "${DEBUG}" > 0 ]] && >&2 echo "flush ipsets"
 . "${SBIN}/ipset-flush"
 
-# create sets
+# create ipsets
 [[ "${DEBUG}" > 0 ]] && >&2 echo "create ipsets"
-# dynamic blocking
-/sbin/ipset --exist create block-ssh-can4   hash:ip  family inet  timeout 600
-/sbin/ipset --exist create block-ssh-can6   hash:ip  family inet6 timeout 600
-/sbin/ipset --exist create block-ssh-can    list:set
-/sbin/ipset --exist create block-ssh-any4   hash:ip  family inet  timeout 3600
-/sbin/ipset --exist create block-ssh-any6   hash:ip  family inet6 timeout 3600
-/sbin/ipset --exist create block-ssh-any    list:set
-/sbin/ipset --exist add block-ssh-can block-ssh-can4
-/sbin/ipset --exist add block-ssh-can block-ssh-can6
-/sbin/ipset --exist add block-ssh-any block-ssh-any4
-/sbin/ipset --exist add block-ssh-any block-ssh-any6
+. "${CONF}/conf.ipset"
 
-for n in ${nets} prv prvcan; do
-  [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset create ${n} list:set"
-  /sbin/ipset create "${n}" list:set
-  for v in 4 6; do
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset create ${n}${v} hash:net"
-    [[ "${v}" == "4" ]] && /sbin/ipset create "${n}${v}" hash:net family inet
-    [[ "${v}" == "6" ]] && /sbin/ipset create "${n}${v}" hash:net family inet6
-    if [ -n "${net[${n}${v}]}" ]; then
-      for i in ${net[${n}${v}]}; do
-        [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add ${n}${v} ${i}"
-        /sbin/ipset add "${n}${v}" "${i}"
-      done
-    fi
-    [[ "${DEBUG}" > 0 ]] && >&2 echo "/sbin/ipset add ${n} ${n}${v}"
-    /sbin/ipset --exist add "${n}" "${n}${v}"
-  done
-done
-
+# generate iptables rules
 >"${UP}"
 for t in raw nat mangle filter; do
   [[ "${DEBUG}" > 0 ]] && >&2 echo "generate table ${t}"
@@ -59,6 +31,6 @@ done
 
 # restore rules
 [[ "${DEBUG}" > 0 ]] && >&2 echo "load ipv4 rules: ${UP}"
-#/sbin/iptables-restore < "${UP}"
+/sbin/iptables-restore < "${UP}"
 [[ "${DEBUG}" > 0 ]] && >&2 echo "load ipv6 rules: ${UP}"
-#/sbin/ip6tables-restore < "${UP}"
+/sbin/ip6tables-restore < "${UP}"
