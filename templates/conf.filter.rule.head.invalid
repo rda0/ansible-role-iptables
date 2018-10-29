@@ -1,27 +1,20 @@
 #!/bin/bash
 
 echo -e "# Drop invalid state packets"
-[[ "${LOG_LEVEL}" > 2 ]] && echo -e "-A INPUT   -m conntrack --ctstate INVALID \
-                                     -m limit --limit ${log[i_invalid_limit]} --limit-burst ${log[i_invalid_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-i]invalid: \""
+[[ "${LOG_LEVEL}" > "${log[i_invalid_lvl]}" ]] && echo -e "\
+         -A INPUT   -m conntrack --ctstate INVALID \
+         -m limit --limit ${log[i_invalid_limit]} --limit-burst ${log[i_invalid_burst]} \
+         -j LOG ${LOG_OPTS} \"[ipt-i]invalid: \""
 echo -e "-A INPUT   -m conntrack --ctstate INVALID -j DROP"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A FORWARD -m conntrack --ctstate INVALID \
-                                     -m limit --limit ${log[f_invalid_limit]} --limit-burst ${log[f_invalid_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
+[[ "${LOG_LEVEL}" > "${log[f_invalid_lvl]}" ]] && echo -e "\
+         -A FORWARD -m conntrack --ctstate INVALID \
+         -m limit --limit ${log[f_invalid_limit]} --limit-burst ${log[f_invalid_burst]} \
+         -j LOG ${LOG_OPTS} \"[ipt-f]invalid: \""
 echo -e "-A FORWARD -m conntrack --ctstate INVALID -j DROP"
 if [[ "${allow_o_any}" != "true" ]]; then
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A OUTPUT  -m conntrack --ctstate INVALID \
-                                       -m limit --limit ${log[o_invalid_limit]} --limit-burst ${log[o_invalid_burst]} \
-                                       -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
+  [[ "${LOG_LEVEL}" > "${log[o_invalid_lvl]}" ]] && echo -e "\
+           -A OUTPUT  -m conntrack --ctstate INVALID \
+           -m limit --limit ${log[o_invalid_limit]} --limit-burst ${log[o_invalid_burst]} \
+           -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
   echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
 fi
-
-# echo -e "# Drop invalid inbound loopback"
-# [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-4 -A INPUT ! -i lo -d 127.0.0.0/8 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-d-lo: \""
-# echo -e "-4 -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP"
-# [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-4 -A INPUT ! -i lo -s 127.0.0.0/8 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-s-lo: \""
-# echo -e "-4 -A INPUT ! -i lo -s 127.0.0.0/8 -j DROP"
-# [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-6 -A INPUT ! -i lo -d ::1/128 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-d-lo: \""
-# echo -e "-6 -A INPUT ! -i lo -d ::1/128 -j DROP"
-# [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-6 -A INPUT ! -i lo -s ::1/128 -j LOG ${LOG_OPTS} \"[ipt-i]notlo-s-lo: \""
-# echo -e "-6 -A INPUT ! -i lo -s ::1/128 -j DROP"

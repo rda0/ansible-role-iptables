@@ -17,7 +17,8 @@ if [[ -n "${lim[on]}" ]]; then
              --hitcount ${lim[ssh_can_hits]} \
              --name lim-ssh \
              -j SET --add-set ban-ssh-can src --exist"
-    [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-lim-ssh  -m set   --match-set can src \
+    [[ "${LOG_LEVEL}" > "${log[i_lim_ssh_can_lvl]}" ]] && echo -e "\
+             -A i-lim-ssh  -m set   --match-set can src \
              -m recent --rcheck --rttl \
              --seconds ${lim[ssh_can_secs]} \
              --hitcount ${lim[ssh_can_hits]} \
@@ -34,7 +35,8 @@ if [[ -n "${lim[on]}" ]]; then
              --hitcount ${lim[ssh_any_hits]} \
              --name lim-ssh \
              -j SET --add-set ban-ssh-any src --exist"
-    [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-lim-ssh  -m set ! --match-set can src \
+    [[ "${LOG_LEVEL}" > "${log[i_lim_ssh_any_lvl]}" ]] && echo -e "\
+             -A i-lim-ssh  -m set ! --match-set can src \
              -m recent --rcheck --rttl \
              --seconds ${lim[ssh_any_secs]} \
              --hitcount ${lim[ssh_any_hits]} \
@@ -43,13 +45,13 @@ if [[ -n "${lim[on]}" ]]; then
              -j LOG ${LOG_OPTS} \"[ipt-i]lim-ssh-any: \""
   fi
 
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "# Log denied connections"
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-lim-ssh -m set --match-set ban-ssh-can src \
-                                       -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
-                                       -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-can: \""
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-lim-ssh -m set --match-set ban-ssh-any src \
-                                       -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
-                                       -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-any: \""
+#  [[ "${LOG_LEVEL}" > 3 ]] && echo -e "# Log denied connections"
+#  [[ "${LOG_LEVEL}" > 3 ]] && echo -e "-A i-lim-ssh -m set --match-set ban-ssh-can src \
+#                                       -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
+#                                       -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-can: \""
+#  [[ "${LOG_LEVEL}" > 3 ]] && echo -e "-A i-lim-ssh -m set --match-set ban-ssh-any src \
+#                                       -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
+#                                       -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-any: \""
 
   echo -e "# Deny connections from sources in block-ssh* tables"
   if [[ "${deny_target_drop}" != "true" ]]; then

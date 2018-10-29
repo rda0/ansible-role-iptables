@@ -2,8 +2,8 @@
 
 if [[ "${deny_i_prv}" == "true" ]]; then
   for c in i f; do
-    [[ "${c}" == "i" ]] && chain="INPUT  " && l=2
-    [[ "${c}" == "f" ]] && chain="FORWARD" && l=1
+    [[ "${c}" == "i" ]] && chain="INPUT  " && l="${log[i_any_s_prv_lvl]}"
+    [[ "${c}" == "f" ]] && chain="FORWARD" && l="${log[f_any_s_prv_lvl]}"
     echo -e "-N ${c}-net-prv"
     echo -e "# Anything coming from the Internet should have a real Internet address"
     for v in 4 6; do

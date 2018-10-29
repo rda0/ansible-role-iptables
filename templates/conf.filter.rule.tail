@@ -15,33 +15,40 @@ echo -e "-A FORWARD -j f-log"
 [[ "${allow_o_any}" != "true" ]] && echo -e "-A OUTPUT  -j o-log"
 
 echo -e "# Limit logging of BROADCAST, MULTICAST, ANYCAST address targets and DROP silently"
-[[ "${LOG_LEVEL}" > 3 ]] && echo -e "-4 -A i-log   -m addrtype --dst-type BROADCAST \
-                                     -m limit --limit ${log[i_bcast_limit]} --limit-burst ${log[i_bcast_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-i]bcast: \""
+[[ "${LOG_LEVEL}" > "${log[i_bcast_lvl]}" ]] && echo -e "\
+     -4 -A i-log   -m addrtype --dst-type BROADCAST \
+     -m limit --limit ${log[i_bcast_limit]} --limit-burst ${log[i_bcast_burst]} \
+     -j LOG ${LOG_OPTS} \"[ipt-i]bcast: \""
 echo -e "-4 -A i-log   -m addrtype --dst-type BROADCAST -j DROP"
-[[ "${LOG_LEVEL}" > 3 ]] && echo -e "-4 -A i-log   -m addrtype --dst-type MULTICAST \
-                                     -m limit --limit ${log[i_mcast_limit]} --limit-burst ${log[i_mcast_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-i]mcast: \""
+[[ "${LOG_LEVEL}" > "${log[i_mcast_lvl]}" ]] && echo -e "\
+     -4 -A i-log   -m addrtype --dst-type MULTICAST \
+     -m limit --limit ${log[i_mcast_limit]} --limit-burst ${log[i_mcast_burst]} \
+     -j LOG ${LOG_OPTS} \"[ipt-i]mcast: \""
 echo -e "-4 -A i-log   -m addrtype --dst-type MULTICAST -j DROP"
-[[ "${LOG_LEVEL}" > 3 ]] && echo -e "-4 -A i-log   -m addrtype --dst-type ANYCAST \
-                                     -m limit --limit ${log[i_acast_limit]} --limit-burst ${log[i_acast_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-i]acast: \""
+[[ "${LOG_LEVEL}" > "${log[i_acast_lvl]}" ]] && echo -e "\
+     -4 -A i-log   -m addrtype --dst-type ANYCAST \
+     -m limit --limit ${log[i_acast_limit]} --limit-burst ${log[i_acast_burst]} \
+     -j LOG ${LOG_OPTS} \"[ipt-i]acast: \""
 echo -e "-4 -A i-log   -m addrtype --dst-type ANYCAST -j DROP"
-[[ "${LOG_LEVEL}" > 3 ]] && echo -e "-6 -A i-log   -m addrtype --dst-type MULTICAST \
-                                     -m limit --limit ${log[i_mcast_limit]} --limit-burst ${log[i_mcast_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-i]mcast: \""
+[[ "${LOG_LEVEL}" > "${log[i_mcast_lvl]}" ]] && echo -e "\
+     -6 -A i-log   -m addrtype --dst-type MULTICAST \
+     -m limit --limit ${log[i_mcast_limit]} --limit-burst ${log[i_mcast_burst]} \
+     -j LOG ${LOG_OPTS} \"[ipt-i]mcast: \""
 echo -e "-6 -A i-log   -m addrtype --dst-type MULTICAST -j DROP"
 
 echo -e "# All other connections are registered in syslog"
-[[ "${LOG_LEVEL}" > 2 ]] && echo -e "-A i-log   -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-i]deny: \""
+[[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+         -A i-log   -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+         -j LOG ${LOG_OPTS} \"[ipt-i]deny: \""
 echo -e "-A i-log   -j RETURN"
-[[ "${LOG_LEVEL}" > 1 ]] && echo -e "-A f-log   -m limit --limit ${log[f_deny_limit]} --limit-burst ${log[f_deny_burst]} \
-                                     -j LOG ${LOG_OPTS} \"[ipt-f]deny: \""
+[[ "${LOG_LEVEL}" > "${log[f_deny_lvl]}" ]] && echo -e "\
+         -A f-log   -m limit --limit ${log[f_deny_limit]} --limit-burst ${log[f_deny_burst]} \
+         -j LOG ${LOG_OPTS} \"[ipt-f]deny: \""
 echo -e "-A f-log   -j RETURN"
 if [[ "${allow_o_any}" != "true" ]]; then
-  [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A o-log   -m limit --limit ${log[o_deny_limit]} --limit-burst ${log[o_deny_burst]} \
-                                       -j LOG ${LOG_OPTS} \"[ipt-o]deny: \""
+  [[ "${LOG_LEVEL}" > "${log[o_deny_lvl]}" ]] && echo -e "\
+           -A o-log   -m limit --limit ${log[o_deny_limit]} --limit-burst ${log[o_deny_burst]} \
+           -j LOG ${LOG_OPTS} \"[ipt-o]deny: \""
   echo -e "-A o-log   -j RETURN"
 fi
 
