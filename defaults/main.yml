@@ -1,181 +1,232 @@
 ---
-### defaults
-
-## ansible role
-
-#use_role_iptables: true
-
 ## script options
 ## debugging (verbosity: 0=off, 1=debug, 2=debugrules)
 
-#iptables_debug: 0
+iptables_debug: 0
 
 ## logging of denies (verbosity: 0=off, 1=out-only, 2=out/fw, 3=in/out/fw, 4=all (incl. casts))
 
-#iptables_log_level: 2
+iptables_log_level: 2
 
-## log levels defaults (these are defaults used for next section `log levels`)
-## logged when: main log_level > individual lvl defined here
+## logging options (`--log-prefix` always required as last option)
 
-#iptables_log_lvl_output: 0
-#iptables_log_lvl_forward: 1
-#iptables_log_lvl_input: 2
-#iptables_log_lvl_special: 3
-
-## log levels [ofi] (output, forward, input)
-
-#iptables_log_{[ofi]_deny,[ofi]_invalid,[fi]_any_s_prv}_lvl
-
-## log levels special
-
-#iptables_log_i_[lim_ssh_can,lim_ssh_any,bcast,mcast,acast]_lvl
-
-iptables_log_i_lim_ssh_can_lvl: 0
-
-## limit rules defaults
-
-#iptables_log_limit: 1/s
-#iptables_log_burst: 100
-
-## these are the defaults used for the following variables:
-
-#iptables_log_{[ifo]_deny,[ifo]_invalid,[lim,ban]_ssh,[fi]_any_s_prv,[bma]cast}_[limit,burst]: 
-
-## rate limits (on="1", off=""), use service name for ports
-
-#iptables_lim_on: 1
-#iptables_lim_ports: ssh
-#iptables_lim_nets: can any
-#iptables_lim_ssh_can_on: 1
-#iptables_lim_ssh_any_on: 1
-#iptables_lim_ssh_can_secs: 60
-#iptables_lim_ssh_can_hits: 20
-#iptables_lim_ssh_can_time: 600
-#iptables_lim_ssh_any_secs: 120
-#iptables_lim_ssh_any_hits: 5
-#iptables_lim_ssh_any_time: 3600
-
-## portscan blocktime
-
-#iptables_portscan_block_seconds: 86400
+iptables_log_opts: '--log-level 7 --log-ip-options --log-uid --log-prefix'
 
 ## interfaces
 ## format: [ interface ... ]
 
-#iptables_if_ext: ansible_default_ipv4.interface
-#iptables_if_br_ext: 
-#iptables_if_br: 
+iptables_if_ext: '{{ ansible_default_ipv4.interface }}'
+iptables_if_br_ext: 
+iptables_if_br: 
+
+# Network list (do not include special networks `prv`, `prvcan`, `any`)
+iptables_nets: adm san cun srv lan can
+
+## log levels defaults (these are defaults used for next section `log levels`)
+## logged when: main log_level > individual lvl defined here
+
+iptables_log_lvl_output: 0
+iptables_log_lvl_forward: 1
+iptables_log_lvl_input: 2
+iptables_log_lvl_special: 3
+
+## log levels [ofi] (output, forward, input)
+#iptables_log_{[ofi]_deny,[ofi]_invalid,[fi]_any_s_prv}_lvl
+
+iptables_log_o_deny_lvl: ${log_lvl_output}
+iptables_log_f_deny_lvl: ${log_lvl_forward}
+iptables_log_i_deny_lvl: ${log_lvl_input}
+iptables_log_o_invalid_lvl: ${log_lvl_output}
+iptables_log_f_invalid_lvl: ${log_lvl_forward}
+iptables_log_i_invalid_lvl: ${log_lvl_input}
+iptables_log_i_lim_ssh_can_lvl: ${log_lvl_special}
+iptables_log_i_lim_ssh_any_lvl: ${log_lvl_special}
+iptables_log_f_any_s_prv_lvl: ${log_lvl_forward}
+iptables_log_i_any_s_prv_lvl: ${log_lvl_input}
+iptables_log_i_bcast_lvl: ${log_lvl_special}
+iptables_log_i_mcast_lvl: ${log_lvl_special}
+iptables_log_i_acast_lvl: ${log_lvl_special}
+
+## limit rules defaults
+# these are the defaults used for the following variables:
+# iptables_log_{[ifo]_deny,[ifo]_invalid,[lim,ban]_ssh,[fi]_any_s_prv,[bma]cast}_[limit,burst]
+
+iptables_log_limit: 1/s
+iptables_log_burst: 100
+
+## logging limits
+
+iptables_log_o_deny_limit: ${log_limit}
+iptables_log_o_deny_burst: ${log_burst}
+iptables_log_f_deny_limit: ${log_limit}
+iptables_log_f_deny_burst: ${log_burst}
+iptables_log_i_deny_limit: ${log_limit}
+iptables_log_i_deny_burst: ${log_burst}
+iptables_log_o_invalid_limit: ${log_limit}
+iptables_log_o_invalid_burst: ${log_burst}
+iptables_log_f_invalid_limit: ${log_limit}
+iptables_log_f_invalid_burst: ${log_burst}
+iptables_log_i_invalid_limit: ${log_limit}
+iptables_log_i_invalid_burst: ${log_burst}
+iptables_log_i_lim_ssh_limit: ${log_limit}
+iptables_log_i_lim_ssh_burst: ${log_burst}
+iptables_log_i_ban_ssh_limit: ${log_limit}
+iptables_log_i_ban_ssh_burst: ${log_burst}
+iptables_log_f_any_s_prv_limit: ${log_limit}
+iptables_log_f_any_s_prv_burst: ${log_burst}
+iptables_log_i_any_s_prv_limit: ${log_limit}
+iptables_log_i_any_s_prv_burst: ${log_burst}
+iptables_log_i_bcast_limit: ${log_limit}
+iptables_log_i_bcast_burst: ${log_burst}
+iptables_log_i_mcast_limit: ${log_limit}
+iptables_log_i_mcast_burst: ${log_burst}
+iptables_log_i_acast_limit: ${log_limit}
+iptables_log_i_acast_burst: ${log_burst}
 
 ## unidirectional filtering, allow all outbound
 ## format: [ true|false ]
 
-#iptables_allow_o_any: false
+iptables_allow_o_any: false
 
 ## ip spoofing protection for private address ranges
 
-#iptables_deny_i_prv: true
+iptables_deny_i_prv: true
 
 ## enable deny target DROP, default is: REJECT
 ## format: [ true|false ]
 
-#iptables_deny_target_drop: false
+iptables_deny_target_drop: false
+
+## rate limits (on="1", off=""), use service name for ports
+
+iptables_lim_on: 1
+iptables_lim_ports: ssh
+iptables_lim_nets: can any
+iptables_lim_ssh_can_on: 1
+iptables_lim_ssh_any_on: 1
+iptables_lim_ssh_can_secs: 60
+iptables_lim_ssh_can_hits: 20
+iptables_lim_ssh_can_time: 600
+iptables_lim_ssh_any_secs: 120
+iptables_lim_ssh_any_hits: 5
+iptables_lim_ssh_any_time: 3600
 
 
-## custom networks
-## format: [ network/cidr-prefix ... ]
+## networks (ansible only variables)
+## format: dict (elements: `<netname>: <cidr_network_address>`)
 
-#iptables_net4_adm_custom: 
-#iptables_net6_adm_custom: 
-#iptables_net4_srv_custom: 
-#iptables_net6_srv_custom: 
-#iptables_net4_can_custom: 
-#iptables_net6_can_custom: 
-#iptables_net4_cun_custom: 
-#iptables_net6_cun_custom: 
-#iptables_net4_prvcan_custom: 
-#iptables_net6_prvcan_custom: 
+iptables_net4_adm: {}
+iptables_net6_adm: {}
+iptables_net4_prvcan: {}
+iptables_net6_prvcan: {}
+iptables_net4_san: {}
+iptables_net6_san: {}
+iptables_net4_srv: {}
+iptables_net6_srv: {}
+iptables_net4_lan: {}
+iptables_net6_lan: {}
+iptables_net4_can: {}
+iptables_net6_can: {}
 
 ## default networks
 ## format: [ network/cidr-prefix ... ]
 
-#iptables_net4_adm_default:    (all isg admin workstations)
-#iptables_net6_adm_default:    (none)
-#iptables_net4_san_default:    (none)
-#iptables_net6_san_default:    (none)
-#iptables_net4_srv_default:    (all server networks)
-#iptables_net6_srv_default:    (all server networks)
-#iptables_net4_lan_default:    (all dept networks)
-#iptables_net6_lan_default:    (all dept networks)
-#iptables_net4_can_default:    (all eth networks)
-#iptables_net6_can_default:    (all eth networks)
-#iptables_net4_prvcan_default: (all private eth networks)
-#iptables_net6_prvcan_default: (all private eth networks)
+iptables_net4_adm_default: '{{ iptables_net4_adm.values()|sort|join(" ") }}'
+iptables_net6_adm_default: '{{ iptables_net6_adm.values()|sort|join(" ") }}'
+iptables_net4_prvcan_default: '{{ iptables_net4_prvcan.values()|sort|join(" ") }}'
+iptables_net6_prvcan_default: '{{ iptables_net6_prvcan.values()|sort|join(" ") }}'
+iptables_net4_san_default: '{{ iptables_net4_san.values()|sort|join(" ") }}'
+iptables_net6_san_default: '{{ iptables_net6_san.values()|sort|join(" ") }}'
+iptables_net4_srv_default: '{{ iptables_net4_srv.values()|sort|join(" ") }}'
+iptables_net6_srv_default: '{{ iptables_net6_srv.values()|sort|join(" ") }}'
+iptables_net4_lan_default: '{{ iptables_net4_lan.values()|sort|join(" ") }}'
+iptables_net6_lan_default: '{{ iptables_net6_lan.values()|sort|join(" ") }}'
+iptables_net4_can_default: '{{ iptables_net4_can.values()|sort|join(" ") }} ${net[prvcan4]}'
+iptables_net6_can_default: '{{ iptables_net6_can.values()|sort|join(" ") }} ${net[prvcan6]}'
+
+## custom networks
+## format: [ network/cidr-prefix ... ]
+
+iptables_net4_adm_custom: {}
+iptables_net6_adm_custom: {}
+iptables_net4_prvcan_custom: {}
+iptables_net6_prvcan_custom: {}
+iptables_net4_san_custom: {}
+iptables_net6_san_custom: {}
+iptables_net4_srv_custom: {}
+iptables_net6_srv_custom: {}
+iptables_net4_lan_custom: {}
+iptables_net6_lan_custom: {}
+iptables_net4_can_custom: {}
+iptables_net6_can_custom: {}
+iptables_net4_cun_custom: {}
+iptables_net6_cun_custom: {}
 
 
 ## open ports (input/output)
 ## format: [ port | port-range ... ]
 
-#iptables_i_tcp_adm: 22
-#iptables_i_udp_adm: 60000:61000
-#iptables_o_tcp_adm: 22
-#iptables_o_udp_adm: 
+iptables_i_tcp_adm: 22
+iptables_i_udp_adm: 
+iptables_o_tcp_adm: 
+iptables_o_udp_adm: 
 
-#iptables_i_tcp_san: 
-#iptables_i_udp_san: 
-#iptables_o_tcp_san: 
-#iptables_o_udp_san: 
+iptables_i_tcp_san: 
+iptables_i_udp_san: 
+iptables_o_tcp_san: 
+iptables_o_udp_san: 
 
-#iptables_i_tcp_srv: 22 113
-#iptables_i_udp_srv: 123
-#iptables_o_tcp_srv: 88 749 464 389 636 1984 19999
-#iptables_o_udp_srv: 123 514 88 749 464 389 636 19999
+iptables_i_tcp_srv: 
+iptables_i_udp_srv: 
+iptables_o_tcp_srv: 
+iptables_o_udp_srv: 
 
-#iptables_i_tcp_lan: 
-#iptables_i_udp_lan: 
-#iptables_o_tcp_lan: 
-#iptables_o_udp_lan: 
+iptables_i_tcp_lan: 
+iptables_i_udp_lan: 
+iptables_o_tcp_lan: 
+iptables_o_udp_lan: 
 
-#iptables_i_tcp_can: 
-#iptables_i_udp_can: 
-#iptables_o_tcp_can: 67
-#iptables_o_udp_can: 67
+iptables_i_tcp_can: 
+iptables_i_udp_can: 
+iptables_o_tcp_can: 
+iptables_o_udp_can: 
 
-#iptables_i_tcp_cun: 
-#iptables_i_udp_cun: 
-#iptables_o_tcp_cun: 
-#iptables_o_udp_cun: 
+iptables_i_tcp_cun: 
+iptables_i_udp_cun: 
+iptables_o_tcp_cun: 
+iptables_o_udp_cun: 
 
-#iptables_i_tcp_any: 
-#iptables_i_udp_any: 
-#iptables_o_tcp_any: 22 25 43 53 4321 80 443 9418 11371
-#iptables_o_udp_any: 43 53 123
+iptables_i_tcp_any: 
+iptables_i_udp_any: 
+iptables_o_tcp_any: 
+iptables_o_udp_any: 
 
 ## port forwards
 ## format: [ interface_port_dstip_dstport ... ]
 
-#iptables_nat4_f_tcp: 
-#iptables_nat4_f_udp: 
+iptables_nat4_f_tcp: 
+iptables_nat4_f_udp: 
 
 ## open ports (forward)
 ## format: [ interface_dstip_dstport ... ]
 
-#iptables_f_tcp_adm: 
-#iptables_f_udp_adm: 
+iptables_f_tcp_adm: 
+iptables_f_udp_adm: 
 
-#iptables_f_tcp_san: 
-#iptables_f_udp_san: 
+iptables_f_tcp_san: 
+iptables_f_udp_san: 
 
-#iptables_f_tcp_srv: 
-#iptables_f_udp_srv: 
+iptables_f_tcp_srv: 
+iptables_f_udp_srv: 
 
-#iptables_f_tcp_lan: 
-#iptables_f_udp_lan: 
+iptables_f_tcp_lan: 
+iptables_f_udp_lan: 
 
-#iptables_f_tcp_can: 
-#iptables_f_udp_can: 
+iptables_f_tcp_can: 
+iptables_f_udp_can: 
 
-#iptables_f_tcp_cun: 
-#iptables_f_udp_cun: 
+iptables_f_tcp_cun: 
+iptables_f_udp_cun: 
 
-#iptables_f_tcp_any: 
-#iptables_f_udp_any: 
+iptables_f_tcp_any: 
+iptables_f_udp_any: 
