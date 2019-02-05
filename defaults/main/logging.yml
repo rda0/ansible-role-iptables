@@ -1,0 +1,73 @@
+---
+# debugging (verbosity: 0=off, 1=debug, 2=debugrules)
+
+iptables_debug: 0
+
+# logging of denies (verbosity: 0=off, 1=out-only, 2=out/fw, 3=in/out/fw, 4=all (incl. casts))
+
+iptables_log_level: 2
+
+# logging options (`--log-prefix` always required as last option)
+
+iptables_log_opts: '--log-level 7 --log-ip-options --log-uid --log-prefix'
+
+# log levels defaults (these are defaults used for next section `log levels`)
+# logged when: main log_level > individual lvl defined here
+
+iptables_log_lvl_output: 0
+iptables_log_lvl_forward: 1
+iptables_log_lvl_input: 2
+iptables_log_lvl_special: 3
+
+# log levels [ofi] (output, forward, input)
+#iptables_log_{[ofi]_deny,[ofi]_invalid,[fi]_any_s_prv}_lvl
+
+iptables_log_o_deny_lvl: ${log_lvl_output}
+iptables_log_f_deny_lvl: ${log_lvl_forward}
+iptables_log_i_deny_lvl: ${log_lvl_input}
+iptables_log_o_invalid_lvl: ${log_lvl_output}
+iptables_log_f_invalid_lvl: ${log_lvl_forward}
+iptables_log_i_invalid_lvl: ${log_lvl_input}
+iptables_log_i_lim_ssh_can_lvl: ${log_lvl_special}
+iptables_log_i_lim_ssh_any_lvl: ${log_lvl_special}
+iptables_log_f_any_s_prv_lvl: ${log_lvl_forward}
+iptables_log_i_any_s_prv_lvl: ${log_lvl_input}
+iptables_log_i_bcast_lvl: ${log_lvl_special}
+iptables_log_i_mcast_lvl: ${log_lvl_special}
+iptables_log_i_acast_lvl: ${log_lvl_special}
+
+# limit rules defaults
+# these are the defaults used for the following variables:
+# iptables_log_{[ifo]_deny,[ifo]_invalid,[lim,ban]_ssh,[fi]_any_s_prv,[bma]cast}_[limit,burst]
+
+iptables_log_limit: 1/s
+iptables_log_burst: 100
+
+# logging limits
+
+iptables_log_o_deny_limit: ${log_limit}
+iptables_log_o_deny_burst: ${log_burst}
+iptables_log_f_deny_limit: ${log_limit}
+iptables_log_f_deny_burst: ${log_burst}
+iptables_log_i_deny_limit: ${log_limit}
+iptables_log_i_deny_burst: ${log_burst}
+iptables_log_o_invalid_limit: ${log_limit}
+iptables_log_o_invalid_burst: ${log_burst}
+iptables_log_f_invalid_limit: ${log_limit}
+iptables_log_f_invalid_burst: ${log_burst}
+iptables_log_i_invalid_limit: ${log_limit}
+iptables_log_i_invalid_burst: ${log_burst}
+iptables_log_i_lim_ssh_limit: ${log_limit}
+iptables_log_i_lim_ssh_burst: ${log_burst}
+iptables_log_i_ban_ssh_limit: ${log_limit}
+iptables_log_i_ban_ssh_burst: ${log_burst}
+iptables_log_f_any_s_prv_limit: ${log_limit}
+iptables_log_f_any_s_prv_burst: ${log_burst}
+iptables_log_i_any_s_prv_limit: ${log_limit}
+iptables_log_i_any_s_prv_burst: ${log_burst}
+iptables_log_i_bcast_limit: ${log_limit}
+iptables_log_i_bcast_burst: ${log_burst}
+iptables_log_i_mcast_limit: ${log_limit}
+iptables_log_i_mcast_burst: ${log_burst}
+iptables_log_i_acast_limit: ${log_limit}
+iptables_log_i_acast_burst: ${log_burst}

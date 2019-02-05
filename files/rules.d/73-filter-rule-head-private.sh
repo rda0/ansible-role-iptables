@@ -22,3 +22,5 @@ if [[ "${deny_i_prv}" == "true" ]]; then
     echo -e "-A ${c}-net-prv -j RETURN"
   done
 fi
+
+echo -ne '\n'

@@ -16,3 +16,5 @@ if [[ "${allow_o_any}" != "true" ]]; then
   echo -e "# Allow local outbound loopback"
   echo -e "-A OUTPUT  -o lo -j ACCEPT"
 fi
+
+echo -ne '\n'

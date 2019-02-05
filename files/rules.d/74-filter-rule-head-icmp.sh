@@ -14,3 +14,5 @@ echo -e "-6 -A INPUT  -p ipv6-icmp -j ACCEPT"
 if [[ "${allow_o_any}" != "true" ]]; then
   echo -e "-6 -A OUTPUT -p ipv6-icmp -j ACCEPT"
 fi
+
+echo -ne '\n'

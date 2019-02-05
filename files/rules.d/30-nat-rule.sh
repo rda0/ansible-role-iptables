@@ -16,3 +16,5 @@ for p in tcp udp; do
     done
   fi
 done
+
+echo -ne '\nCOMMIT\n\n'

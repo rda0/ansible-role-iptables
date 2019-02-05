@@ -49,3 +49,5 @@ for n in ${nets} any; do
   [[ -n "${ch[o]}" ]] && [[ "${allow_o_any}" != "true" ]] && echo -e "-A o-net-${n} -j RETURN"
   [[ -n "${ch[f]}" ]] &&                                     echo -e "-A f-net-${n} -j RETURN"
 done
+
+echo -ne '\n'

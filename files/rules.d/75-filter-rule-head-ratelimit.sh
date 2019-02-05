@@ -45,14 +45,6 @@ if [[ -n "${lim[on]}" ]]; then
              -j LOG ${LOG_OPTS} \"[ipt-i]lim-ssh-any: \""
   fi
 
-#  [[ "${LOG_LEVEL}" > 3 ]] && echo -e "# Log denied connections"
-#  [[ "${LOG_LEVEL}" > 3 ]] && echo -e "-A i-lim-ssh -m set --match-set ban-ssh-can src \
-#                                       -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
-#                                       -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-can: \""
-#  [[ "${LOG_LEVEL}" > 3 ]] && echo -e "-A i-lim-ssh -m set --match-set ban-ssh-any src \
-#                                       -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
-#                                       -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-any: \""
-
   echo -e "# Deny connections from sources in block-ssh* tables"
   if [[ "${deny_target_drop}" != "true" ]]; then
     echo -e "-4 -A i-lim-ssh -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp-admin-prohibited"
@@ -69,12 +61,4 @@ if [[ -n "${lim[on]}" ]]; then
   echo -e "-A i-lim-ssh -j RETURN"
 fi
 
-# echo -e "# Attempt to block portscans (this is probably a very bad idea -> DOS)"
-# echo -e "# Anyone who tried to portscan us is locked out for {{ iptables_portscan_block_seconds|default('86400') }} s"
-# [[ "${LOG_LEVEL}" > 2 ]] && echo -e "-A i-rate -m recent --name portscan --rcheck --seconds {{ iptables_portscan_block_seconds|default('86400') }} -j LOG ${LOG_OPTS} \"[ipt-i]scandrop: \""
-# echo -e "-A i-rate -m recent --name portscan --rcheck --seconds {{ iptables_portscan_block_seconds|default('86400') }} -j DROP"
-# echo -e "# Once the day has passed, remove them from the portscan list"
-# echo -e "-A i-rate -m recent --name portscan --remove"
-# echo -e "# These rules add scanners to the portscan list, and log the attempt."
-# [[ "${LOG_LEVEL}" > 0 ]] && echo -e "-A i-rate -p tcp -m tcp --dport 139 -m recent --name portscan --set -j LOG ${LOG_OPTS} \"[ipt-i]portscan: \""
-# echo -e "-A i-rate -p tcp -m tcp --dport 139 -m recent --name portscan --set -j DROP"
+echo -ne '\n'

@@ -11,8 +11,8 @@ Before=shutdown.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/sbin/iptables-start
-ExecStop=/usr/sbin/iptables-stop
+ExecStart=/usr/local/sbin/iptables-start
+ExecStop=/usr/local/sbin/iptables-stop
 
 [Install]
 WantedBy=multi-user.target

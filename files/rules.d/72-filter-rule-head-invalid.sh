@@ -18,3 +18,5 @@ if [[ "${allow_o_any}" != "true" ]]; then
            -j LOG ${LOG_OPTS} \"[ipt-o]invalid: \""
   echo -e "-A OUTPUT  -m conntrack --ctstate INVALID -j DROP"
 fi
+
+echo -ne '\n'

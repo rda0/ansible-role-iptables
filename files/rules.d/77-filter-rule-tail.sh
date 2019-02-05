@@ -52,16 +52,6 @@ if [[ "${allow_o_any}" != "true" ]]; then
   echo -e "-A o-log   -j RETURN"
 fi
 
-# echo -e "# And finally rejected (trusted)"
-# echo -e "-4 -A INPUT   -m set --match-set can4 src -j REJECT"
-# echo -e "-6 -A INPUT   -m set --match-set can6 src -j REJECT"
-# if [[ "${allow_o_any}" != "true" ]]; then
-#   echo -e "-4 -A OUTPUT  -m set --match-set can4 dst -j REJECT"
-#   echo -e "-6 -A OUTPUT  -m set --match-set can6 dst -j REJECT"
-# fi
-# echo -e "-4 -A FORWARD -m set --match-set can4 src -j REJECT"
-# echo -e "-6 -A FORWARD -m set --match-set can6 src -j REJECT"
-
 echo -e "# And finally denied"
 echo -e "-A INPUT   -j i-deny"
 echo -e "-A FORWARD -j f-deny"
@@ -95,3 +85,5 @@ fi
 echo -e "-A i-deny   -j RETURN"
 echo -e "-A f-deny   -j RETURN"
 [[ "${allow_o_any}" != "true" ]] && echo -e "-A o-deny   -j RETURN"
+
+echo -ne '\nCOMMIT\n\n'

@@ -8,3 +8,5 @@ if [[ "${allow_o_any}" != "true" ]]; then
 else
   echo -e ":OUTPUT ACCEPT"
 fi
+
+echo -ne '\n'

@@ -1,0 +1,68 @@
+---
+# open ports (input/output)
+# format: [ port | port-range ... ]
+
+iptables_i_tcp_adm: 22
+iptables_i_udp_adm: 
+iptables_o_tcp_adm: 
+iptables_o_udp_adm: 
+
+iptables_i_tcp_san: 
+iptables_i_udp_san: 
+iptables_o_tcp_san: 
+iptables_o_udp_san: 
+
+iptables_i_tcp_srv: 
+iptables_i_udp_srv: 
+iptables_o_tcp_srv: 
+iptables_o_udp_srv: 
+
+iptables_i_tcp_lan: 
+iptables_i_udp_lan: 
+iptables_o_tcp_lan: 
+iptables_o_udp_lan: 
+
+iptables_i_tcp_can: 
+iptables_i_udp_can: 
+iptables_o_tcp_can: 
+iptables_o_udp_can: 
+
+iptables_i_tcp_cun: 
+iptables_i_udp_cun: 
+iptables_o_tcp_cun: 
+iptables_o_udp_cun: 
+
+iptables_i_tcp_any: 
+iptables_i_udp_any: 
+iptables_o_tcp_any: 
+iptables_o_udp_any: 
+
+# port forwards
+# format: [ interface_port_dstip_dstport ... ]
+
+iptables_nat4_f_tcp: 
+iptables_nat4_f_udp: 
+
+# open ports (forward)
+# format: [ interface_dstip_dstport ... ]
+
+iptables_f_tcp_adm: 
+iptables_f_udp_adm: 
+
+iptables_f_tcp_san: 
+iptables_f_udp_san: 
+
+iptables_f_tcp_srv: 
+iptables_f_udp_srv: 
+
+iptables_f_tcp_lan: 
+iptables_f_udp_lan: 
+
+iptables_f_tcp_can: 
+iptables_f_udp_can: 
+
+iptables_f_tcp_cun: 
+iptables_f_udp_cun: 
+
+iptables_f_tcp_any: 
+iptables_f_udp_any: 
