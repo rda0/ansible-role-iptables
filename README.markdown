@@ -1,14 +1,28 @@
 # ansible-role-iptables
 
-This repo contains an Ansible role to deploy a stateful [iptables](https://netfilter.org/projects/iptables/index.html) firewall in combination with [ipsets](https://netfilter.org/projects/ipset/index.html) for fast filtering against IP ranges or IP addresses. It supports both IPv4 and IPv6 with a single configuration. The filter policy is **deny all**, **allow some** in all packet flow directions (INPUT, OUTPUT, FORWARD). This policy may seem very strict, but it ensures not only to know all the services provided to a network, but also all the services in the other direction (consumed from a network). However, there is also a configuration option to enable unidirectional filtering mode to allow all outgoing traffic, as it is a common setup on most homegrade router firewalls.
+This repo contains an [Ansible](https://www.ansible.com/) role to deploy a stateful [iptables](https://netfilter.org/projects/iptables/index.html) firewall in combination with [ipsets](https://netfilter.org/projects/ipset/index.html) for fast filtering against IP ranges or IP addresses. It supports both IPv4 and IPv6 with a single configuration. The filter policy is **deny all**, **allow some** in all [packet flow directions](https://upload.wikimedia.org/wikipedia/commons/3/37/Netfilter-packet-flow.svg) ([INPUT](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png), [OUTPUT](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png), [FORWARD](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png)). This policy may seem very strict, but it ensures not only to know all the services provided to a network, but also all the services in the other direction (consumed from a network). However, there is also a configuration option to enable unidirectional filtering mode to allow all outgoing traffic, as it is a common setup on most homegrade router firewalls.
+
+This role is designed to provide a robust iptables host firewall with very few configuration options in the form of:
+
+```
+network_a: 192.0.2.0/24 198.51.100.0/24
+network_b: 203.0.113.0/24
+
+open_ports_network_a: ssh http https 19999
+open_ports_network_b: 53 smtp imap
+```
+
+While the end result only consists of a configuration file (with the networks and open ports) and a few bash scripts to generate the ipsets and iptables rules, deployment using Ansible makes it scalable across a wide range of hosts with different services.
+
+This role is not intended for routers with lots of interfaces which would require a complex setup. All interfaces are treated equally and are automatically protected. There is one exception, an operating mode to configure the firewall for use on a router, to protect an internal (trusted) network on one interface from an external (untrusted) network on another interface. It is also possible to define port forwarding rules in such a scenario. This mimics the behaviour as it can be found on homegrade router firewalls.
 
 ## Features
 
 - Internet protocol versions: **IPv4**, **IPv6**
 - Filter policy: **deny all**, **allow some**
 - Filter direction: **ALL** directions (default) | **INPUT**, **FORWARD** (all outgoing traffic allowed)
-- Deny policy: **REJECT** as per RFC (default) | **DROP**
-- IP spoofing protection: denies private address ranges (RFC 1918, RFC 4193) by default
+- Deny policy: **REJECT** (default) | **DROP**
+- IP spoofing protection: denies private address ranges ([RFC 1918](https://www.rfc-editor.org/rfc/rfc1918.txt), [RFC 4193](https://www.rfc-editor.org/rfc/rfc4193.txt)) by default
 - Explicitely allow locally routed private address ranges for your network
 - Multiple interfaces: internal, external and bridged interfaces
 - Once deployed fully independant from Ansible, it's just one config file and a bunch of bash scripts
@@ -18,3 +32,263 @@ This repo contains an Ansible role to deploy a stateful [iptables](https://netfi
 - Port rate limiting: protects sensitive ports like ssh from bruteforce attacks
 - Extensive logging: all denied packets can be logged (depending on the configured loglevel)
 - Logging DOS protection: all types of denied packets are limited by a separately configurable rate limit
+- Port forwarding rules: applicable for IPv4 only
+
+Planned features (not implemented yet):
+
+- Possibility for arbitrary network definitions
+- Per host/IP rules
+- Possiblity to define services (instead of protocols and ports)
+- Possiblity to use this role as replacement for TCP wrappers
+
+## Variables
+
+All configuration options are controlled via ansible variables. All variables and their default values are documented in the yaml files in the role defaults directory (`defaults/main/*.yml`).
+
+It is best practice to define your variable values in the Ansible inventory (`group_vars` and `host_vars`).
+
+## General options
+
+These variables control the general behaviour of the firewall.
+
+Unidirectional filtering mode: To allow all outbound traffic, set the following variable to `true`:
+
+```yaml
+iptables_allow_o_any: false
+```
+
+IP spoofing protection for private address ranges: To disable it, set to `false`:
+
+```yaml
+iptables_deny_i_prv: true
+```
+
+Deny policy: The default setting is to actively reject denied packets with a proper network response in the same way the Linux kernel would do it. Should you for any reason whish to drop packets instead, set the following variable to `true`:
+
+```yml
+iptables_deny_target_drop: false
+```
+
+## Interfaces
+
+All interfaces are automatically detected and protected by the firewall. But for some advanced setups, like when interfaces are bridged, they need to be properly specified in the configuration.
+
+Here are some examples:
+
+### Single interface
+
+If you have just one interface connected to an external network, the defaults are fine:
+
+From `defaults/main/00-main.yml`:
+
+```yaml
+iptables_if_ext: '{{ ansible_default_ipv4.interface }}'
+iptables_if_br_ext:
+iptables_if_br:
+```
+
+### Multiple interfaces (bridged)
+
+A setup with multiple interfaces and possibly bridges needs to be configured explicitely:
+
+```yaml
+iptables_if_ext:
+iptables_if_br_ext: eth0 eth1
+iptables_if_br: br0 br1
+```
+
+In this example we have a host with two network interfaces `eth0` and `eth1` connected to separate networks. This machine is also serving as kvm hypervisor, hosting virtual machines in a bridged setup on two bridges `br0` and `br1` where the two physical interfaces are attached respectively.
+
+## Networks
+
+This role knows 9 network zones that may be filled with IP ranges using Ansible:
+
+| name   | description                   | definition   |
+|--------|-------------------------------|--------------|
+| adm    | admin networks                | user defined |
+| prv    | private address ranges        | pre defined  |
+| prvcan | locally routed ranges in prv  | user defined |
+| san    | system/storage area networks  | user defined |
+| cun    | custom network                | user defined |
+| srv    | server networks               | user defined |
+| lan    | local area network            | user defined |
+| can    | campus/corporate area network | user defined |
+| any    | any network ("the internet")  | pre defined  |
+
+These network zones will be translated to ipsets that can be used to match packets against in the iptables rules. For each non empty ipset, a custom chain is created in iptables. Each packet will be matched against the ipsets in the following (customizable) order:
+
+```yml
+iptables_nets: adm san cun srv lan can
+```
+
+If a packet matches an ipset, it will be sent to the respective chain. Each network (ipset) chain may allow (accept) combinations of protocols and ports (see below). If a packet is accepted no more rules will be evaluated. If none of the rules match, the packet will be returned to the parent chain and continues on its way down with the next ipsets.
+
+The network zones are to be configured for IPv4 and IPv6 separately using the following Ansible dictionary variables (see also `defaults/main/30-networks.yml`):
+
+```yaml
+# networks (ansible only variables)
+# format: dict (elements: `<netname>: <cidr_network_address>`)
+
+iptables_net4_adm: {}
+iptables_net6_adm: {}
+iptables_net4_prvcan: {}
+iptables_net6_prvcan: {}
+iptables_net4_san: {}
+iptables_net6_san: {}
+iptables_net4_srv: {}
+iptables_net6_srv: {}
+iptables_net4_lan: {}
+iptables_net6_lan: {}
+iptables_net4_can: {}
+iptables_net6_can: {}
+```
+
+To list single IP addresses in the network ranges, just use the biggest CIDR prefix. For IPv4: `<ip>//32` or for IPv6: `<ip>/128`.
+
+## Ports
+
+Open ports can be configured using multiple variables per network. Each variable will be filled with a space separated list of port numbers, port names or port ranges understood by iptables.
+
+The variable name syntax is as follows:
+
+```
+iptables_<chain>_<protocol>_<network>
+```
+
+While `<chain>` can be any of:
+
+- `i`: INPUT chain
+- `o`: OUTPUT chain
+- `f`: FORWARD chain
+
+and `<protocol>` can be:
+
+- `tcp`: Transmission control protocol
+- `udp`: User Datagram Protocol
+
+and `<network>` can be any of the network/ipset names specified in the table in the previous section.
+
+
+Here the 4 variables for the admin network (inbound, outbound) as an example:
+
+```yaml
+# open ports (input/output)
+# format: [ port | port-range ... ]
+
+iptables_i_tcp_adm:
+iptables_i_udp_adm:
+iptables_o_tcp_adm:
+iptables_o_udp_adm:
+```
+
+Refer to `defaults/main/40-ports.yml` for a complete list of variables and their defaults.
+
+The default is to deny all ports, except the inbound TCP port `22` (ssh) for the admin network. Should you forget or fail to configure an admin network, ssh connections will be accepted from any network. This serves as a failsave to hopefully prevent you from locking yourself out of the target host.
+
+## Example configuration
+
+In your inventorys `group_vars/all` variables you could define your network ranges and some sane port defaults as follows:
+
+```yaml
+## networks (ansible only variables)
+## format: dict (elements: `<netname>: <cidr_network_address>`)
+
+# admin workstations
+
+iptables_net4_adm:
+  admin-workstation-1: 192.0.2.2/32
+  admin-workstation-2: 192.0.2.3/32
+  admin-workstation-3: 192.0.2.4/32
+
+# networks from private address ranges routed and allowed for your network
+
+iptables_net4_prvcan:
+  public-dhcp: 10.0.0.0/8
+  vpn: 192.168.0.0/16
+
+# server networks
+
+iptables_net4_srv:
+  core-server: 198.51.100.0/25
+  customer-server: 198.51.100.128/25 192.0.2.67/32
+
+iptables_net6_srv:
+  core-server: 2001:db8:abc:42:/64
+
+# local area network (department only)
+
+iptables_net4_lan:
+  core-server: 198.51.100.0/25
+  customer-server: 198.51.100.128/25 192.0.2.67/32
+  department-staff-vpn: 192.168.1.0/24 192.168.2.0/24
+
+iptables_net6_lan:
+  department-range: 2001:db8:abc:/48
+
+# campus area network
+
+iptables_net4_can:
+  campus-main-1: 192.0.2.0/24
+  campus-main-2: 198.51.100.0/24
+  campus-main-3: 203.0.113.0/24
+  public-dhcp: 10.0.0.0/8
+  vpn: 192.168.0.0/16
+
+iptables_net6_can:
+  campus-range: 2001:db8:/32
+
+
+## open ports (input/output)
+## format: [ port | port-range ... ]
+
+# ssh
+iptables_i_tcp_adm: 22
+# mosh
+iptables_i_udp_adm: 60000:61000
+# ssh
+iptables_o_tcp_adm:
+iptables_o_udp_adm:
+
+# ssh
+iptables_i_tcp_srv: 22
+# ntp
+iptables_i_udp_srv: 123
+# kdc kadmin kpasswd ldap ldaps
+iptables_o_tcp_srv: 88 749 464 389 636
+# ntp syslog kdc kadmin kpasswd ldap ldaps
+iptables_o_udp_srv: 123 514 88 749 464 389 636
+
+iptables_i_tcp_can:
+iptables_i_udp_can:
+# dhcp
+iptables_o_tcp_can: 67
+# dhcp
+iptables_o_udp_can: 67
+
+iptables_i_tcp_any:
+iptables_i_udp_any:
+# ssh smtp whois dns rwhois http https git gpg
+iptables_o_tcp_any: 22 25 43 53 4321 80 443 9418 11371
+# whois dns ntp
+iptables_o_udp_any: 43 53 123
+```
+
+In your specific `group_vars` or `host_vars` you can define open ports depending on the services provided by that host or host-group:
+
+```yaml
+# interfaces
+
+iptables_if_ext:
+iptables_if_br_ext: eth0 eth1
+iptables_if_br: br0 br1
+
+# custom admins
+
+iptables_net4_adm_custom:
+  alice: 192.0.2.7/32
+  bob: 192.0.2.34/32
+
+# public services
+
+iptables_i_tcp_any: 80 443
+```
