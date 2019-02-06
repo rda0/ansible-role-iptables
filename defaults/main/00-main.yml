@@ -19,17 +19,3 @@ iptables_deny_i_prv: true
 # format: [ true|false ]
 
 iptables_deny_target_drop: false
-
-# rate limits (on="1", off=""), use service name for ports
-
-iptables_lim_on: 1
-iptables_lim_ports: ssh
-iptables_lim_nets: can any
-iptables_lim_ssh_can_on: 1
-iptables_lim_ssh_any_on: 1
-iptables_lim_ssh_can_secs: 60
-iptables_lim_ssh_can_hits: 20
-iptables_lim_ssh_can_time: 600
-iptables_lim_ssh_any_secs: 120
-iptables_lim_ssh_any_hits: 5
-iptables_lim_ssh_any_time: 3600

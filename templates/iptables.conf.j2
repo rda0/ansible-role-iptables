@@ -90,32 +90,20 @@ log[i_acast_limit]="{{ iptables_log_i_acast_limit }}"
 log[i_acast_burst]="{{ iptables_log_i_acast_burst }}"
 
 # Enable unidirectional stateful filtering, allows all outbound (true/false)
-{% if iptables_allow_o_any %}
-allow_o_any="true"
-{% else %}
-allow_o_any="false"
-{% endif %}
+allow_o_any="{{ iptables_allow_o_any | ternary('true', 'false') }}"
 
 # Enable IP spoofing protection for private address ranges
-{% if iptables_deny_i_prv %}
-deny_i_prv="true"
-{% else %}
-deny_i_prv="false"
-{% endif %}
+deny_i_prv="{{ iptables_deny_i_prv | ternary('true', 'false') }}"
 
 # Enable deny target DROP, default is: REJECT (true/false)
-{% if iptables_deny_target_drop %}
-deny_target_drop="true"
-{% else %}
-deny_target_drop="false"
-{% endif %}
+deny_target_drop="{{ iptables_deny_target_drop | ternary('true', 'false') }}"
 
 # Enable rate limits, default is: enabled (1/"")
-lim[on]="{{ iptables_lim_on }}"
+lim[on]="{{ iptables_lim_on | ternary('1', '') }}"
 lim[ports]="{{ iptables_lim_ports }}"
 lim[nets]="{{ iptables_lim_nets }}"
-lim[ssh_can_on]="{{ iptables_lim_ssh_can_on }}"
-lim[ssh_any_on]="{{ iptables_lim_ssh_any_on }}"
+lim[ssh_can_on]="{{ iptables_lim_ssh_can_on | ternary('1', '') }}"
+lim[ssh_any_on]="{{ iptables_lim_ssh_any_on | ternary('1', '') }}"
 lim[ssh_can_secs]="{{ iptables_lim_ssh_can_secs }}"
 lim[ssh_can_hits]="{{ iptables_lim_ssh_can_hits }}"
 lim[ssh_can_time]="{{ iptables_lim_ssh_can_time }}"

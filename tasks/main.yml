@@ -95,6 +95,12 @@
     - conf.filter.rule.head.ratelimit
     - conf.filter.rule.body
     - conf.filter.rule.tail
+    - up.rules
+    - last.4.rules
+    - last.6.rules
+    - last.ipsets
+    - new.ipsets
+    - new.rules
 
 - name: create iptables scripts
   copy:

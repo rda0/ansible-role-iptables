@@ -32,7 +32,7 @@ iptables_i_udp_cun:
 iptables_o_tcp_cun: 
 iptables_o_udp_cun: 
 
-iptables_i_tcp_any: 
+iptables_i_tcp_any: '{{ "" if iptables_net4_adm or iptables_net4_adm_default or iptables_net4_adm_custom or iptables_net6_adm or iptables_net6_adm_default or iptables_net6_adm_custom else "22" }}'
 iptables_i_udp_any: 
 iptables_o_tcp_any: 
 iptables_o_udp_any: 

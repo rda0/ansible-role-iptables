@@ -1,7 +1,4 @@
 ---
-- name: noop
-  command: /bin/true
-
 - name: restart iptables
   service: name=iptables state=restarted
   async: 10
