@@ -155,10 +155,6 @@
     dest: /etc/systemd/system/libvirtd.service.d/override.conf
   register: systemd_libvirtd_service_override
 
-- name: systemd daemon-reload for libvirtd.service override
-  command: /bin/systemctl daemon-reload
-  when: systemd_libvirtd_service_override.changed
-
 - name: create directory /etc/systemd/system/fail2ban.service.d
   file:
     path: /etc/systemd/system/fail2ban.service.d
@@ -169,10 +165,6 @@
     src: service/fail2ban.service.override.conf
     dest: /etc/systemd/system/fail2ban.service.d/override.conf
   register: systemd_fail2ban_service_override
-
-- name: systemd daemon-reload for fail2ban.service override
-  command: /bin/systemctl daemon-reload
-  when: systemd_fail2ban_service_override.changed
 
 - name: enable systemd iptables.service
   systemd:
