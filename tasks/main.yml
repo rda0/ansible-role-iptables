@@ -59,49 +59,6 @@
     - 76-filter-rule-body
     - 77-filter-rule-tail
 
-- name: remove obsolete config
-  file:
-    path: '/etc/iptables/{{ item }}'
-    state: absent
-  loop:
-    - conf.raw.rules
-    - conf.nat.rules
-    - conf.mangle.rules
-    - conf.filter.rules.head.accept
-    - conf.filter.rules.head.invalid
-    - conf.filter.rules.head.private
-    - conf.filter.rules.head.icmp
-    - conf.filter.rules.head.ratelimit
-    - conf.filter.rules.body
-    - conf.filter.rules.body.ipv4
-    - conf.filter.rules.body.ipv6
-    - conf.filter.rules.tail
-    - up.rules.ipv4
-    - up.rules.ipv6
-    - up.rules.ipv
-    - conf.ipset
-    - conf.raw.policy
-    - conf.raw.rule
-    - conf.nat.policy
-    - conf.nat.rule
-    - conf.mangle.policy
-    - conf.mangle.rule
-    - conf.filter.policy
-    - conf.filter.rule
-    - conf.filter.rule.head.accept
-    - conf.filter.rule.head.invalid
-    - conf.filter.rule.head.private
-    - conf.filter.rule.head.icmp
-    - conf.filter.rule.head.ratelimit
-    - conf.filter.rule.body
-    - conf.filter.rule.tail
-    - up.rules
-    - last.4.rules
-    - last.6.rules
-    - last.ipsets
-    - new.ipsets
-    - new.rules
-
 - name: create iptables scripts
   copy:
     src: 'sbin/{{ item }}.sh'
@@ -115,17 +72,6 @@
     - iptables-flush
     - ipsets-flush
 
-- name: remove obsolete iptables scripts
-  file:
-    path: '/usr/sbin/{{ item }}'
-    state: absent
-  loop:
-    - iptables-reload
-    - iptables-start
-    - iptables-stop
-    - iptables-flush
-    - ipset-flush
-
 - name: create iptables systemd service file
   copy:
     src: service/iptables.service
@@ -133,11 +79,6 @@
     owner: root
     group: root
     mode: '0644'
-
-- name: 'remove obsolete rsyslog conf: /etc/rsyslog.d/iptables.conf TODO: remove'
-  file:
-    path: /etc/rsyslog.d/iptables.conf
-    state: absent
 
 - name: create iptables rsyslog config
   copy:
@@ -177,8 +118,3 @@
     enabled: yes
     daemon_reload: yes
     name: iptables
-
-- name: remove obsolete link /etc/network/if-pre-up.d/iptables
-  file:
-    path: /etc/network/if-pre-up.d/iptables
-    state: absent
