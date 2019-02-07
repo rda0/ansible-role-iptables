@@ -14,7 +14,7 @@ open_ports_network_b: 53 smtp imap
 
 While the end result only consists of a configuration file (with the networks and open ports) and a few bash scripts to generate the ipsets and iptables rules, deployment using Ansible makes it scalable across a wide range of hosts with different services.
 
-This role is not intended for routers with lots of interfaces which would require a complex setup. All interfaces are treated equally and are automatically protected. ~~There is one exception, an operating mode to configure the firewall for use on a router, to protect an internal (trusted) network on one interface from an external (untrusted) network on another interface.~~ It is also possible to define port forwarding rules ~~in such a scenario~~. ~~This mimics the behaviour as it can be found on homegrade router firewalls.~~
+This role is not intended for routers with lots of interfaces which would require a complex setup. All interfaces are treated equally and are automatically protected.
 
 ## Features
 
@@ -22,8 +22,7 @@ This role is not intended for routers with lots of interfaces which would requir
 - Filter policy: **deny all**, **allow some**
 - Filter direction: **ALL** directions (default) | **INPUT**, **FORWARD** (all outgoing traffic allowed)
 - Deny policy: **REJECT** (default) | **DROP**
-- IP spoofing protection: denies private address ranges ([RFC 1918](https://www.rfc-editor.org/rfc/rfc1918.txt), [RFC 4193](https://www.rfc-editor.org/rfc/rfc4193.txt)) by default
-- Explicitely allow locally routed private address ranges for your network
+- Deny private address ranges ([RFC 1918](https://www.rfc-editor.org/rfc/rfc1918.txt), [RFC 4193](https://www.rfc-editor.org/rfc/rfc4193.txt)): **deny all**, **allow some**
 - Multiple interfaces: All interfaces are protected automatically
 - Once deployed fully independant from Ansible, it's just one config file and a bunch of bash scripts
 - Persistent accross reboots: started/stopped/restarted using a systemd service unit
