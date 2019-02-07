@@ -4,12 +4,21 @@ This repo contains an [Ansible](https://www.ansible.com/) role to deploy a state
 
 This role is designed to provide a robust iptables host firewall with very few configuration options in the form of:
 
-```
-network_a: 192.0.2.0/24 198.51.100.0/24
-network_b: 203.0.113.0/24
+```yaml
+# networks
 
-open_ports_network_a: ssh http https 19999
-open_ports_network_b: 53 smtp imap
+iptables_net4_adm:
+  admin-network1: 192.0.2.0/24
+  admin-network2: 198.51.100.0/24
+
+iptables_net4_srv:
+  server-networks: 203.0.113.0/24
+
+# open ports
+
+iptables_i_tcp_adm: ssh http https 19999
+iptables_i_tcp_srv: smtp imap
+iptables_i_udp_srv: 53 123
 ```
 
 While the end result only consists of a configuration file (with the networks and open ports) and a few bash scripts to generate the ipsets and iptables rules, deployment using Ansible makes it scalable across a wide range of hosts with different services.
@@ -18,9 +27,7 @@ This role is not intended for routers with lots of interfaces which would requir
 
 ## Features
 
-- Internet protocol versions: **IPv4**, **IPv6**
 - Filter policy: **deny all**, **allow some**
-- Filter direction: **ALL** directions (default) | **INPUT**, **FORWARD** (all outgoing traffic allowed)
 - Deny policy: **REJECT** (default) | **DROP**
 - Deny private address ranges ([RFC 1918](https://www.rfc-editor.org/rfc/rfc1918.txt), [RFC 4193](https://www.rfc-editor.org/rfc/rfc4193.txt)): **deny all**, **allow some**
 - Multiple interfaces: All interfaces are protected automatically
