@@ -1,8 +1,6 @@
 # ansible-role-iptables
 
-This repo contains an [Ansible](https://www.ansible.com/) role to deploy a stateful [iptables](https://netfilter.org/projects/iptables/index.html) firewall in combination with [ipsets](https://netfilter.org/projects/ipset/index.html) for fast filtering against IP ranges or IP addresses. It supports both IPv4 and IPv6 with a single configuration. The filter policy is **deny all**, **allow some** in all [packet flow directions](https://upload.wikimedia.org/wikipedia/commons/3/37/Netfilter-packet-flow.svg) ([INPUT](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png), [OUTPUT](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png), [FORWARD](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png)). This policy allows not only to filter all the services provided to a network, but also to filter all the services in the other direction (consumed from a network). However, there is also a configuration option to enable unidirectional filtering mode to allow all outgoing traffic, as it is a common setup on most homegrade router firewalls.
-
-This role is designed to provide a robust iptables host firewall with very few configuration options in the form of:
+This role is designed to provide a robust iptables host firewall with just a few configuration options in the form of:
 
 ```yaml
 # networks
@@ -21,6 +19,10 @@ iptables_i_tcp_srv: smtp imap
 iptables_i_udp_srv: 53 123
 ```
 
+## Description
+
+This repo contains an [Ansible](https://www.ansible.com/) role to deploy a stateful [iptables](https://netfilter.org/projects/iptables/index.html) firewall in combination with [ipsets](https://netfilter.org/projects/ipset/index.html) for fast filtering against IP ranges or IP addresses. It supports both IPv4 and IPv6 with a single configuration. The filter policy is **deny all**, **allow some** in all [packet flow directions](https://upload.wikimedia.org/wikipedia/commons/3/37/Netfilter-packet-flow.svg) ([INPUT](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png), [OUTPUT](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png), [FORWARD](https://github.com/rda0/diagram/blob/master/iptables-chains-hooks-dark.png)). This policy allows not only to filter all the services provided to a network, but also to filter all the services in the other direction (consumed from a network). However, there is also a configuration option to enable unidirectional filtering mode to allow all outgoing traffic, as it is a common setup on most homegrade router firewalls.
+
 While the end result only consists of a configuration file (with the networks and open ports) and a few bash scripts to generate the ipsets and iptables rules, deployment using Ansible makes it scalable across a wide range of hosts with different services.
 
 This role is not intended for routers with lots of interfaces which would require a complex setup. All interfaces are treated equally and are automatically protected.
@@ -31,14 +33,13 @@ This role is not intended for routers with lots of interfaces which would requir
 - Deny policy: **REJECT** (default) | **DROP**
 - Deny private address ranges ([RFC 1918](https://www.rfc-editor.org/rfc/rfc1918.txt), [RFC 4193](https://www.rfc-editor.org/rfc/rfc4193.txt)): **deny all**, **allow some**
 - Multiple interfaces: All interfaces are protected automatically
-- Once deployed fully independant from Ansible, it's just one config file and a bunch of bash scripts
 - Persistent accross reboots: started/stopped/restarted using a systemd service unit
 - Error handling: if a service restart fails after a config change it falls back to the last working configuration
 - Integrates with other service units: fail2ban, libvirtd
 - Port rate limiting: protects sensitive ports like ssh from bruteforce attacks
 - Extensive logging: all denied packets can be logged (depending on the configured loglevel)
 - Logging DOS protection: all types of denied packets are limited by a separately configurable rate limit
-- Port forwarding rules: applicable for IPv4 only
+- Port forwarding rules: applicable for IPv4 only (experimental)
 
 Planned features (not implemented yet):
 
