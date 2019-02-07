@@ -2,9 +2,12 @@
 # interfaces
 # format: [ interface ... ]
 
-iptables_if_ext: '{{ ansible_default_ipv4.interface }}'
-iptables_if_br_ext: 
-iptables_if_br: 
+# TODO: Deactivated code (for internal/external interfaces)
+#iptables_if_ext: '{{ ansible_default_ipv4.interface }}'
+#iptables_if_br_ext: 
+
+# Bridged interfaces
+iptables_allow_bridge_interfaces: 
 
 # unidirectional filtering, allow all outbound
 # format: [ true|false ]

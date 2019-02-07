@@ -14,7 +14,7 @@ open_ports_network_b: 53 smtp imap
 
 While the end result only consists of a configuration file (with the networks and open ports) and a few bash scripts to generate the ipsets and iptables rules, deployment using Ansible makes it scalable across a wide range of hosts with different services.
 
-This role is not intended for routers with lots of interfaces which would require a complex setup. All interfaces are treated equally and are automatically protected. There is one exception, an operating mode to configure the firewall for use on a router, to protect an internal (trusted) network on one interface from an external (untrusted) network on another interface. It is also possible to define port forwarding rules in such a scenario. This mimics the behaviour as it can be found on homegrade router firewalls.
+This role is not intended for routers with lots of interfaces which would require a complex setup. All interfaces are treated equally and are automatically protected. ~~There is one exception, an operating mode to configure the firewall for use on a router, to protect an internal (trusted) network on one interface from an external (untrusted) network on another interface.~~ It is also possible to define port forwarding rules ~~in such a scenario~~. ~~This mimics the behaviour as it can be found on homegrade router firewalls.~~
 
 ## Features
 
@@ -24,7 +24,7 @@ This role is not intended for routers with lots of interfaces which would requir
 - Deny policy: **REJECT** (default) | **DROP**
 - IP spoofing protection: denies private address ranges ([RFC 1918](https://www.rfc-editor.org/rfc/rfc1918.txt), [RFC 4193](https://www.rfc-editor.org/rfc/rfc4193.txt)) by default
 - Explicitely allow locally routed private address ranges for your network
-- Multiple interfaces: internal, external and bridged interfaces
+- Multiple interfaces: All interfaces are protected automatically
 - Once deployed fully independant from Ansible, it's just one config file and a bunch of bash scripts
 - Persistent accross reboots: started/stopped/restarted using a systemd service unit
 - Error handling: if a service restart fails after a config change it falls back to the last working configuration
@@ -40,6 +40,7 @@ Planned features (not implemented yet):
 - Per host/IP rules
 - Possiblity to define services (instead of protocols and ports)
 - Possiblity to use this role as replacement for TCP wrappers
+- Rewrite code for interface configs (internal/external)
 
 ## Variables
 
@@ -79,26 +80,22 @@ Long story short, when we bridge interfaces and lock down our firewall in the `F
 
 Here are some examples:
 
-### Single interface
+### Single or multiple interfaces
 
-If you have just one interface connected to an external network, the defaults are fine:
+If you do not have bridges, the defaults are fine (you do not need to specify any interfaces in the inventory):
 
 From `defaults/main/00-main.yml`:
 
 ```yaml
-iptables_if_ext: '{{ ansible_default_ipv4.interface }}'
-iptables_if_br_ext:
-iptables_if_br:
+iptables_allow_bridge_interfaces:
 ```
 
-### Multiple interfaces (bridged)
+### Using bridged interfaces
 
-A setup with multiple interfaces and possibly bridges needs to be configured explicitely:
+In a setup with bridges, the bridge interfaces need to be configured explicitely:
 
 ```yaml
-iptables_if_ext:
-iptables_if_br_ext: eth0 eth1
-iptables_if_br: br0 br1
+iptables_allow_bridge_interfaces: br0 br1
 ```
 
 In this example we have a host with two network interfaces `eth0` and `eth1` connected to separate networks. This machine is also serving as kvm hypervisor, hosting virtual machines in a bridged setup on two bridges `br0` and `br1` where the two physical interfaces are attached respectively.
@@ -282,9 +279,7 @@ In your specific `group_vars` or `host_vars` you can define open ports depending
 ```yaml
 # interfaces
 
-iptables_if_ext:
-iptables_if_br_ext: eth0 eth1
-iptables_if_br: br0 br1
+iptables_allow_bridge_interfaces: br0 br1
 
 # custom admins
 

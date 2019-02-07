@@ -17,10 +17,14 @@ LOG_LEVEL="{{ iptables_log_level }}"
 # Logging options (`--log-prefix` always required as last option)
 LOG_OPTS="{{ iptables_log_opts }}"
 
-# Interfaces
-if_ext="{{ iptables_if_ext }}"
-if_br_ext="{{ iptables_if_br_ext }}"
-if_br="{{ iptables_if_br }}"
+## Interface config
+
+# TODO: Deactivated code (for internal/external interfaces)
+#if_ext="{{ iptables_if_ext }}"
+#if_br_ext="{{ iptables_if_br_ext }}"
+
+# Bridged interfaces
+if_br="{{ iptables_allow_bridge_interfaces }}"
 
 # Network list (do not include special networks `prv`, `prvcan`, `any`)
 nets="{{ iptables_nets }}"

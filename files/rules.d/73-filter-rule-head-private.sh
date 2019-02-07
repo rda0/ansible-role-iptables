@@ -7,12 +7,14 @@ if [[ "${deny_i_prv}" == "true" ]]; then
     echo -e "-N ${c}-net-prv"
     echo -e "# Anything coming from the Internet should have a real Internet address"
     for v in 4 6; do
-      for i in ${if_ext}; do
-        echo -e "-${v} -A ${chain} -m set --match-set prv${v} src -i ${i} -j ${c}-net-prv"
-      done
-      for i in ${if_br_ext}; do
-        echo -e "-${v} -A ${chain} -m set --match-set prv${v} src -m physdev --physdev-in ${i} -j ${c}-net-prv"
-      done
+      # TODO: Deactivated code (for internal/external interfaces)
+      #for i in ${if_ext}; do
+      #  echo -e "-${v} -A ${chain} -m set --match-set prv${v} src -i ${i} -j ${c}-net-prv"
+      #done
+      #for i in ${if_br_ext}; do
+      #  echo -e "-${v} -A ${chain} -m set --match-set prv${v} src -m physdev --physdev-in ${i} -j ${c}-net-prv"
+      #done
+      echo -e "-${v} -A ${chain} -m set --match-set prv${v} src -j ${c}-net-prv"
       echo -e "# Everything in the private address range gets denied, except our allowed ipv${v} networks"
       [[ "${LOG_LEVEL}" > ${l} ]] && echo -e "-${v} -A ${c}-net-prv -m set ! --match-set prvcan${v} src \
                                               -m limit --limit ${log[${c}_any_s_prv_limit]} --limit-burst ${log[${c}_any_s_prv_burst]} \
