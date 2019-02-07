@@ -143,7 +143,7 @@ iptables_net4_can: {}
 iptables_net6_can: {}
 ```
 
-To list single IP addresses in the network ranges, just use the biggest CIDR prefix. For IPv4: `<ip>//32` or for IPv6: `<ip>/128`.
+To list single IP addresses in the network ranges, just use the biggest CIDR prefix. For IPv4: `<ip>/32` or for IPv6: `<ip>/128`.
 
 ## Ports
 
