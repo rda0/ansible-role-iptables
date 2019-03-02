@@ -1,4 +1,20 @@
 ---
+- name: check if iptables-legacy is present
+  stat:
+    path: /usr/sbin/iptables-legacy
+  register: iptables_legacy
+
+- name: select iptables-legacy alternatives
+  alternatives:
+    name: '{{ item.name }}'
+    path: '/usr/sbin/{{ item.path }}'
+  loop:
+    - name: iptables
+      path: iptables-legacy
+    - name: ip6tables
+      path: ip6tables-legacy
+  when: iptables_legacy.stat.exists
+
 - name: install required pkgs for iptables
   package:
     pkg:
