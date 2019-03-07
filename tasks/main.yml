@@ -1,136 +1,140 @@
 ---
-- name: check if iptables-legacy is present
-  stat:
-    path: /usr/sbin/iptables-legacy
-  register: iptables_legacy
+- block:
 
-- name: select iptables-legacy alternatives
-  alternatives:
-    name: '{{ item.name }}'
-    path: '/usr/sbin/{{ item.path }}'
-  loop:
-    - name: iptables
-      path: iptables-legacy
-    - name: ip6tables
-      path: ip6tables-legacy
-  when: iptables_legacy.stat.exists
+    - name: check if iptables-legacy is present
+      stat:
+        path: /usr/sbin/iptables-legacy
+      register: iptables_legacy
 
-- name: install required pkgs for iptables
-  package:
-    pkg:
-    - iptables
-    - ipset
-    - iprange
+    - name: select iptables-legacy alternatives
+      alternatives:
+        name: '{{ item.name }}'
+        path: '/usr/sbin/{{ item.path }}'
+      loop:
+        - name: iptables
+          path: iptables-legacy
+        - name: ip6tables
+          path: ip6tables-legacy
+      when: iptables_legacy.stat.exists
 
-- name: create directory /etc/iptables
-  file:
-    path: /etc/iptables
-    state: directory
+    - name: install required pkgs for iptables
+      package:
+        pkg:
+        - iptables
+        - ipset
+        - iprange
 
-- name: create iptables config
-  template:
-    src: iptables.conf.j2
-    dest: /etc/iptables/iptables.conf
-    mode: '0644'
-  notify: restart iptables
+    - name: create directory /etc/iptables
+      file:
+        path: /etc/iptables
+        state: directory
 
-- name: create directory /etc/iptables/ipsets.d
-  file:
-    path: /etc/iptables/ipsets.d
-    state: directory
+    - name: create iptables config
+      template:
+        src: iptables.conf.j2
+        dest: /etc/iptables/iptables.conf
+        mode: '0644'
+      notify: restart iptables
 
-- name: create ipsets generate scripts
-  copy:
-    src: 'ipsets.d/{{ item }}.sh'
-    dest: '/etc/iptables/ipsets.d/{{ item }}'
-    mode: '0644'
-  notify: restart iptables
-  loop:
-    - 00-dynamic
-    - 10-static
+    - name: create directory /etc/iptables/ipsets.d
+      file:
+        path: /etc/iptables/ipsets.d
+        state: directory
 
-- name: create directory /etc/iptables/rules.d
-  file: path=/etc/iptables/rules.d state=directory
+    - name: create ipsets generate scripts
+      copy:
+        src: 'ipsets.d/{{ item }}.sh'
+        dest: '/etc/iptables/ipsets.d/{{ item }}'
+        mode: '0644'
+      notify: restart iptables
+      loop:
+        - 00-dynamic
+        - 10-static
 
-- name: create iptables rules generate scripts
-  copy:
-    src: 'rules.d/{{ item }}.sh'
-    dest: '/etc/iptables/rules.d/{{ item }}'
-    mode: '0644'
-  notify: restart iptables
-  loop:
-    - 00-raw-policy
-    - 10-raw-rule
-    - 20-nat-policy
-    - 30-nat-rule
-    - 40-mangle-policy
-    - 50-mangle-rule
-    - 60-filter-policy
-    - 70-filter-rule-head-common
-    - 71-filter-rule-head-accept
-    - 72-filter-rule-head-invalid
-    - 73-filter-rule-head-private
-    - 74-filter-rule-head-icmp
-    - 75-filter-rule-head-ratelimit
-    - 76-filter-rule-body
-    - 77-filter-rule-tail
+    - name: create directory /etc/iptables/rules.d
+      file: path=/etc/iptables/rules.d state=directory
 
-- name: create iptables scripts
-  copy:
-    src: 'sbin/{{ item }}.sh'
-    dest: '/usr/local/sbin/{{ item }}'
-    mode: '0755'
-  notify: restart iptables
-  loop:
-    - iptables-restart
-    - iptables-start
-    - iptables-stop
-    - iptables-flush
-    - ipsets-flush
+    - name: create iptables rules generate scripts
+      copy:
+        src: 'rules.d/{{ item }}.sh'
+        dest: '/etc/iptables/rules.d/{{ item }}'
+        mode: '0644'
+      notify: restart iptables
+      loop:
+        - 00-raw-policy
+        - 10-raw-rule
+        - 20-nat-policy
+        - 30-nat-rule
+        - 40-mangle-policy
+        - 50-mangle-rule
+        - 60-filter-policy
+        - 70-filter-rule-head-common
+        - 71-filter-rule-head-accept
+        - 72-filter-rule-head-invalid
+        - 73-filter-rule-head-private
+        - 74-filter-rule-head-icmp
+        - 75-filter-rule-head-ratelimit
+        - 76-filter-rule-body
+        - 77-filter-rule-tail
 
-- name: create iptables systemd service file
-  copy:
-    src: service/iptables.service
-    dest: /etc/systemd/system/iptables.service
-    owner: root
-    group: root
-    mode: '0644'
+    - name: create iptables scripts
+      copy:
+        src: 'sbin/{{ item }}.sh'
+        dest: '/usr/local/sbin/{{ item }}'
+        mode: '0755'
+      notify: restart iptables
+      loop:
+        - iptables-restart
+        - iptables-start
+        - iptables-stop
+        - iptables-flush
+        - ipsets-flush
 
-- name: create iptables rsyslog config
-  copy:
-    src: log/rsyslog.conf
-    dest: /etc/rsyslog.d/00-iptables.conf
-  notify: restart rsyslog
+    - name: create iptables systemd service file
+      copy:
+        src: service/iptables.service
+        dest: /etc/systemd/system/iptables.service
+        owner: root
+        group: root
+        mode: '0644'
 
-- name: create iptables logrotate config
-  copy:
-    src: log/logrotate.conf
-    dest: /etc/logrotate.d/iptables.conf
+    - name: create iptables rsyslog config
+      copy:
+        src: log/rsyslog.conf
+        dest: /etc/rsyslog.d/00-iptables.conf
+      notify: restart rsyslog
 
-- name: create directory /etc/systemd/system/libvirtd.service.d
-  file:
-    path: /etc/systemd/system/libvirtd.service.d
-    state: directory
+    - name: create iptables logrotate config
+      copy:
+        src: log/logrotate.conf
+        dest: /etc/logrotate.d/iptables.conf
 
-- name: create systemd libvirtd.service override
-  copy:
-    src: service/libvirtd.service.override.conf
-    dest: /etc/systemd/system/libvirtd.service.d/override.conf
-  register: systemd_libvirtd_service_override
+    - name: create directory /etc/systemd/system/libvirtd.service.d
+      file:
+        path: /etc/systemd/system/libvirtd.service.d
+        state: directory
 
-- name: create directory /etc/systemd/system/fail2ban.service.d
-  file:
-    path: /etc/systemd/system/fail2ban.service.d
-    state: directory
+    - name: create systemd libvirtd.service override
+      copy:
+        src: service/libvirtd.service.override.conf
+        dest: /etc/systemd/system/libvirtd.service.d/override.conf
+      register: systemd_libvirtd_service_override
 
-- name: create systemd fail2ban.service override
-  copy:
-    src: service/fail2ban.service.override.conf
-    dest: /etc/systemd/system/fail2ban.service.d/override.conf
-  register: systemd_fail2ban_service_override
+    - name: create directory /etc/systemd/system/fail2ban.service.d
+      file:
+        path: /etc/systemd/system/fail2ban.service.d
+        state: directory
 
-- name: enable systemd iptables.service
-  systemd:
-    enabled: yes
-    daemon_reload: yes
-    name: iptables
+    - name: create systemd fail2ban.service override
+      copy:
+        src: service/fail2ban.service.override.conf
+        dest: /etc/systemd/system/fail2ban.service.d/override.conf
+      register: systemd_fail2ban_service_override
+
+    - name: enable systemd iptables.service
+      systemd:
+        enabled: yes
+        daemon_reload: yes
+        name: iptables
+
+  tags: iptables
