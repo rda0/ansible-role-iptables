@@ -22,7 +22,6 @@
         pkg:
         - iptables
         - ipset
-        - iprange
 
     - name: create directory /etc/iptables
       file:
