@@ -4,7 +4,7 @@ for n in ${nets} any; do
   declare -A ch
   for c in i o f; do
     ch[${c}]=1
-    [[ ! -n "${port[${c}_tcp_${n}]}" ]] && [[ ! -n "${port[${c}_tcp_${n}]}" ]] && ch[${c}]=""
+    [[ ! -n "${port[${c}_tcp_${n}]}" ]] && [[ ! -n "${port[${c}_udp_${n}]}" ]] && ch[${c}]=""
   done
   echo -e "# Define chains for network ${n} if required (open ports)"
   [[ -n "${ch[i]}" ]] &&                                     echo -e "-N i-net-${n}"
