@@ -118,6 +118,7 @@
       src: service/libvirtd.service.override.conf
       dest: /etc/systemd/system/libvirtd.service.d/override.conf
     register: systemd_libvirtd_service_override
+    notify: reload systemd
 
   - name: create directory /etc/systemd/system/fail2ban.service.d
     file:
@@ -129,6 +130,19 @@
       src: service/fail2ban.service.override.conf
       dest: /etc/systemd/system/fail2ban.service.d/override.conf
     register: systemd_fail2ban_service_override
+    notify: reload systemd
+
+  - name: create directory /etc/systemd/system/docker.service.d
+    file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+
+  - name: create systemd docker.service override
+    copy:
+      src: service/docker.service.override.conf
+      dest: /etc/systemd/system/docker.service.d/override.conf
+    register: systemd_docker_service_override
+    notify: reload systemd
 
   - name: enable systemd iptables.service
     systemd:
