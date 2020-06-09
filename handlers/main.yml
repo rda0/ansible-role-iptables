@@ -3,6 +3,7 @@
   service: name=iptables state=restarted
   async: 10
   poll: 1
+  when: not ansible_check_mode
 
 - name: restart rsyslog
   service: name=rsyslog state=restarted
