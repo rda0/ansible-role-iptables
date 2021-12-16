@@ -5,7 +5,7 @@
 # TODO: Deactivated code (for internal/external interfaces)
 
 # Bridged interfaces
-iptables_allow_bridge_interfaces: 
+iptables_allow_bridge_interfaces:
 
 # unidirectional filtering, allow all outbound
 # format: [ true|false ]
