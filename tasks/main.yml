@@ -151,8 +151,5 @@
       daemon_reload: yes
       name: iptables
 
-  - name: flush handlers
-    meta: flush_handlers
-
   tags: iptables
   when: role_iptables
