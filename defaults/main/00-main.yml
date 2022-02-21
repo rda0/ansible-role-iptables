@@ -1,4 +1,7 @@
 ---
+# enable this role
+role_iptables: True
+
 # interfaces
 # format: [ interface ... ]
 

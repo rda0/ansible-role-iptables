@@ -147,7 +147,12 @@
   - name: enable systemd iptables.service
     systemd:
       enabled: yes
+      state: started
       daemon_reload: yes
       name: iptables
 
+  - name: flush handlers
+    meta: flush_handlers
+
   tags: iptables
+  when: role_iptables
