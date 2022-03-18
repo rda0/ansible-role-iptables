@@ -150,6 +150,11 @@
       state: started
       daemon_reload: yes
       name: iptables
+    # We need async to keep the ssh connection alive when iptables
+    # is being deployed and started for the first time.
+    # As async is not compatible with check mode, we disable it there.
+    async: "{{ ansible_check_mode | ternary(0, 10) }}"
+    poll: 1
 
   tags: iptables
   when: role_iptables
