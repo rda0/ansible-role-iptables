@@ -5,6 +5,11 @@ for i in ${if_br}; do
   echo -e "-A FORWARD -i ${i} -o ${i} -j ACCEPT"
 done
 
+[[ "${if_tuntap}" != "" ]] && echo -e "# Allow tuntap traffic"
+for i in ${if_tuntap}; do
+  echo -e "-A FORWARD -i ${i} -j ACCEPT"
+done
+
 echo -e "# Create logging chain"
 echo -e "-N i-log"
 echo -e "-N f-log"

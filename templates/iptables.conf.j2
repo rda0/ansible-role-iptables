@@ -24,6 +24,9 @@ LOG_OPTS="{{ iptables_log_opts }}"
 # Bridged interfaces
 if_br="{{ iptables_allow_bridge_interfaces }}"
 
+# Tun/Tap interfaces
+if_tuntap="{{ iptables_allow_tuntap_interfaces }}"
+
 # Network list (do not include special networks `prv`, `prvcan`, `any`)
 nets="{{ iptables_nets }}"
 

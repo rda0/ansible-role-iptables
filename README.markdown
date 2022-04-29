@@ -107,6 +107,18 @@ iptables_allow_bridge_interfaces: br0 br1
 
 In this example we have a host with two network interfaces `eth0` and `eth1` connected to separate networks. This machine is also serving as kvm hypervisor, hosting virtual machines in a bridged setup on two bridges `br0` and `br1` where the two physical interfaces are attached respectively.
 
+All traffic in both directions of the bridge interfaces will be accepted.
+
+### Using tuntap interfaces
+
+Similarily we need to specify any tuntap interfaces:
+
+```yaml
+iptables_allow_tuntap_interfaces: tun+
+```
+All traffic originating from tuntap interfaces will be accepted.
+
+
 ## Networks
 
 This role knows 9 network zones that may be filled with IP ranges using Ansible:

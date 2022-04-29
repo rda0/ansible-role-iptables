@@ -10,6 +10,9 @@ role_iptables: True
 # Bridged interfaces
 iptables_allow_bridge_interfaces:
 
+# Tun/Tap interfaces
+iptables_allow_tuntap_interfaces:
+
 # unidirectional filtering, allow all outbound
 # format: [ true|false ]
 
