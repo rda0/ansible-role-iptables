@@ -118,6 +118,12 @@ iptables_allow_tuntap_interfaces: tun+
 ```
 All traffic originating from tuntap interfaces will be accepted.
 
+### Allow any traffic from/to specific interfaces
+
+```yaml
+iptables_allow_interfaces: eno3
+```
+
 
 ## Networks
 

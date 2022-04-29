@@ -27,6 +27,9 @@ if_br="{{ iptables_allow_bridge_interfaces }}"
 # Tun/Tap interfaces
 if_tuntap="{{ iptables_allow_tuntap_interfaces }}"
 
+# Accept all traffic on specific interfaces
+if_accept="{{ iptables_allow_interfaces }}"
+
 # Network list (do not include special networks `prv`, `prvcan`, `any`)
 nets="{{ iptables_nets }}"
 

@@ -13,6 +13,9 @@ iptables_allow_bridge_interfaces:
 # Tun/Tap interfaces
 iptables_allow_tuntap_interfaces:
 
+# Accept any traffic on specific interfaces
+iptables_allow_interfaces:
+
 # unidirectional filtering, allow all outbound
 # format: [ true|false ]
 
