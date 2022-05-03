@@ -13,8 +13,16 @@ iptables_allow_bridge_interfaces:
 # Tun/Tap interfaces
 iptables_allow_tuntap_interfaces:
 
+# Accept forwarded traffic from physical interfaces (physdev-in)
+iptables_allow_physdev_in_interfaces:
+
 # Accept any traffic on specific interfaces
 iptables_allow_interfaces:
+
+# Configure IPv4 SNAT (source network address translation)
+iptables_snat_ipv4:
+iptables_snat_out_interface:
+iptables_snat_source_network:
 
 # unidirectional filtering, allow all outbound
 # format: [ true|false ]

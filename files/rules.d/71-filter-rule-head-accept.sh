@@ -27,4 +27,9 @@ if [[ "${allow_o_any}" != "true" ]]; then
   done
 fi
 
+[[ "${if_physdev_in}" != "" ]] && echo -e "# Allow any forwarded traffic from physical interfaces"
+for i in ${if_physdev_in}; do
+  echo -e "-A FORWARD -m physdev --physdev-in ${i} -j ACCEPT"
+done
+
 echo -ne '\n'

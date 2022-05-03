@@ -27,8 +27,16 @@ if_br="{{ iptables_allow_bridge_interfaces }}"
 # Tun/Tap interfaces
 if_tuntap="{{ iptables_allow_tuntap_interfaces }}"
 
+# Accept forwarded traffic from physical interfaces (physdev-in)
+if_physdev_in="{{ iptables_allow_physdev_in_interfaces }}"
+
 # Accept all traffic on specific interfaces
 if_accept="{{ iptables_allow_interfaces }}"
+
+# Configure IPv4 SNAT (source network address translation)
+snat_ipv4="{{ iptables_snat_ipv4 }}"
+snat_out_if="{{ iptables_snat_out_interface }}"
+snat_src_net="{{ iptables_snat_source_network }}"
 
 # Network list (do not include special networks `prv`, `prvcan`, `any`)
 nets="{{ iptables_nets }}"

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ "${snat_ipv4}" != "" ]] && [[ "${snat_out_if}" != "" ]] && [[ "${snat_src_net}" != "" ]]; then
+  echo -e "# Enable SNAT"
+  echo -e "-4 -A POSTROUTING -s ${snat_src_net} -o ${snat_out_if} -j SNAT --to-source ${snat_ipv4}"
+  echo -ne '\n'
+fi
+
 for p in tcp udp; do
   if [ -n "${nat[4_f_${p}]}" ]; then
     for f in ${nat[4_f_${p}]}; do
