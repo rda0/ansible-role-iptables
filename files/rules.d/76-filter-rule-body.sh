@@ -50,4 +50,24 @@ for n in ${nets} any; do
   [[ -n "${ch[f]}" ]] &&                                     echo -e "-A f-net-${n} -j RETURN"
 done
 
+for n in ${cnets}; do
+  for v in 4 6; do
+    for p in tcp udp; do
+      for c in i o; do
+        if [ -n "${cport[${n}_${c}_${p}]}" ] && [ -n "${cnet[${n}_${v}]}" ]; then
+          for port in ${cport[${n}_${c}_${p}]}; do
+            if [[ "${c}" == "i" ]]; then
+              echo -e "-${v} -A INPUT -p ${p} -m ${p} -s ${cnet[${n}_${v}]} --dport ${port} -j ACCEPT"
+              [[ "${DEBUG}" > 1 ]] && >&2 echo -e "-${v} -A INPUT -p ${p} -m ${p} -s ${cnet[${n}_${v}]} --dport ${port} -j ACCEPT"
+            elif [[ "${c}" == "o" ]] && [[ "${allow_o_any}" != "true" ]]; then
+              echo -e "-${v} -A OUTPUT -p ${p} -m ${p} -d ${cnet[${n}_${v}]} --dport ${port} -j ACCEPT"
+              [[ "${DEBUG}" > 1 ]] && >&2 echo -e "-${v} -A OUTPUT -p ${p} -m ${p} -d ${cnet[${n}_${v}]} --dport ${port} -j ACCEPT"
+            fi
+          done
+        fi
+      done
+    done
+  done
+done
+
 echo -ne '\n'

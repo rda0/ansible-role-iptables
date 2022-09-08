@@ -295,3 +295,31 @@ port[f_udp_any]="{{ iptables_f_udp_any }}"
 # format: "interface_port_dstip_dstport"
 nat[4_f_tcp]="{{ iptables_nat4_f_tcp }}"
 nat[4_f_udp]="{{ iptables_nat4_f_udp }}"
+
+
+#### Special endpoints (for single networks or hosts)
+
+# Custom networks name list (format: whitespace separated)
+# Example: cnets="net1 host1"
+cnets="{{ iptables_endpoints.keys() | join(" ") }}"
+
+# Custom network addresses (key format: `<name>_[4|6]`, value format: `address[/mask][,...]`)
+declare -A cnet
+# Custom ports (key format: `<name>_[i|o]_[tcp|udp]`, value format: whitespace separated)
+declare -A cport
+
+# Custom endpoints
+{% for name, endpoint in iptables_endpoints.items() %}
+{% for version in ['4', '6'] %}
+{% if endpoint.address['ipv' + version] | default(None) %}
+cnet[{{ name }}_{{ version }}]="{{ endpoint.address['ipv' + version] }}"
+{% endif %}
+{% endfor %}
+{% for direction in ['inbound', 'outbound'] %}
+{% for protocol in ['tcp', 'udp'] %}
+{% if endpoint.ports[direction][protocol] | default(None) %}
+cport[{{ name }}_{{ direction | first() }}_{{ protocol }}]="{{ endpoint.ports[direction][protocol] }}"
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endfor %}

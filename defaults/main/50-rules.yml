@@ -5,3 +5,6 @@ iptables_rules_raw: []
 iptables_rules_nat: []
 iptables_rules_mangle: []
 iptables_rules_filter: []
+
+# special endpoints (for single networks or hosts)
+iptables_endpoints: {}

@@ -40,11 +40,12 @@ This role is not intended for routers with lots of interfaces which would requir
 - Extensive logging: all denied packets can be logged (depending on the configured loglevel)
 - Logging DOS protection: all types of denied packets are limited by a separately configurable rate limit
 - Port forwarding rules: applicable for IPv4 only (experimental)
+- Per host/IP/address rules (endpoints)
+- Custom rules
 
 Planned features (not implemented yet):
 
 - Possibility for arbitrary network definitions
-- Per host/IP rules
 - Possiblity to define services (instead of protocols and ports)
 - Possiblity to use this role as replacement for TCP wrappers
 - Rewrite code for interface configs (internal/external)
@@ -212,6 +213,44 @@ iptables_o_udp_adm:
 Refer to `defaults/main/40-ports.yml` for a complete list of variables and their defaults.
 
 The default is to deny all ports, except the inbound TCP port `22` (ssh) for the admin network. Should you forget or fail to configure an admin network, ssh connections will be accepted from any network. This serves as a failsave to hopefully prevent you from locking yourself out of the target host.
+
+## Special endpoints
+
+For special endpoints (single network or host addresses) not covered by the global networks (`iptables_net...`)
+use the variable `iptables_endpoints`. **These will not use iptsets** (slower). The syntax is as follows:
+
+```yaml
+iptables_endpoints:
+  <name>:
+    address:
+      [ipv4|ipv6]: <address>[/<mask>][,...]
+    ports:
+      [inbound|outbound]:
+        [tcp|udp]: <port>[ ...]
+```
+
+Example:
+
+```yaml
+iptables_endpoints:
+  host1:
+    address:
+      ipv4: 192.0.2.5/32
+      ipv6: 1291:65bc:30ce:3dc4::26/128
+    ports:
+      inbound:
+        tcp: 11 12 13
+        udp: 13
+      outbound:
+        tcp: 12
+        udp: 14 56
+  net1:
+    address: { ipv4: 198.51.100.0/24 }
+    ports: { inbound: { tcp: 50 } }
+  host2:
+    address: { ipv4: 192.0.2.7 }
+    ports: { outbound: { udp: 7 } }
+```
 
 ## Custom rules
 
