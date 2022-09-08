@@ -194,10 +194,15 @@ net6_can_custom="{{ iptables_net6_can_custom.values()|sort|join(" ") }}"
 net[can4]="${net4_can_default} ${net4_can_custom}"
 net[can6]="${net6_can_default} ${net6_can_custom}"
 
-## Custom networks (for host specific rules): cun
+## Custom network: cun
+# Ansible variables
+net4_cun_default="{{ iptables_net4_cun_default }}"
+net6_cun_default="{{ iptables_net6_cun_default }}"
+net4_cun_custom="{{ iptables_net4_cun_custom.values()|sort|join(" ") }}"
+net6_cun_custom="{{ iptables_net6_cun_custom.values()|sort|join(" ") }}"
 # Script variables
-net[cun4]="{{ iptables_net4_cun_custom.values()|sort|join(" ") }}"
-net[cun6]="{{ iptables_net6_cun_custom.values()|sort|join(" ") }}"
+net[cun4]="${net4_cun_default} ${net4_cun_custom}"
+net[cun6]="${net6_cun_default} ${net6_cun_custom}"
 
 
 #### Open Ports

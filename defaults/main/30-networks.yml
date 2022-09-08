@@ -12,6 +12,8 @@ iptables_net4_prvcan: {}
 iptables_net6_prvcan: {}
 iptables_net4_san: {}
 iptables_net6_san: {}
+iptables_net4_cun: {}
+iptables_net6_cun: {}
 iptables_net4_srv: {}
 iptables_net6_srv: {}
 iptables_net4_lan: {}
@@ -28,6 +30,8 @@ iptables_net4_prvcan_default: '{{ iptables_net4_prvcan.values()|sort|join(" ") }
 iptables_net6_prvcan_default: '{{ iptables_net6_prvcan.values()|sort|join(" ") }}'
 iptables_net4_san_default: '{{ iptables_net4_san.values()|sort|join(" ") }}'
 iptables_net6_san_default: '{{ iptables_net6_san.values()|sort|join(" ") }}'
+iptables_net4_cun_default: '{{ iptables_net4_cun.values()|sort|join(" ") }}'
+iptables_net6_cun_default: '{{ iptables_net6_cun.values()|sort|join(" ") }}'
 iptables_net4_srv_default: '{{ iptables_net4_srv.values()|sort|join(" ") }}'
 iptables_net6_srv_default: '{{ iptables_net6_srv.values()|sort|join(" ") }}'
 iptables_net4_lan_default: '{{ iptables_net4_lan.values()|sort|join(" ") }}'
@@ -44,11 +48,11 @@ iptables_net4_prvcan_custom: {}
 iptables_net6_prvcan_custom: {}
 iptables_net4_san_custom: {}
 iptables_net6_san_custom: {}
+iptables_net4_cun_custom: {}
+iptables_net6_cun_custom: {}
 iptables_net4_srv_custom: {}
 iptables_net6_srv_custom: {}
 iptables_net4_lan_custom: {}
 iptables_net6_lan_custom: {}
 iptables_net4_can_custom: {}
 iptables_net6_can_custom: {}
-iptables_net4_cun_custom: {}
-iptables_net6_cun_custom: {}
