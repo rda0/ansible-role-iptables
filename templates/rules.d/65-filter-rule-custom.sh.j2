@@ -1,0 +1,5 @@
+#!/bin/bash
+
+{% for rule in iptables_rules_filter %}
+echo -e "{{ rule }}"
+{% endfor %}

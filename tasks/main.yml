@@ -76,6 +76,18 @@
       - 76-filter-rule-body
       - 77-filter-rule-tail
 
+  - name: deploy iptables rules custom scripts
+    template:
+      src: 'rules.d/{{ item }}.sh.j2'
+      dest: '/etc/iptables/rules.d/{{ item }}'
+      mode: '0644'
+    notify: restart iptables
+    loop:
+      - 05-raw-rule-custom
+      - 25-nat-rule-custom
+      - 45-mangle-rule-custom
+      - 65-filter-rule-custom
+
   - name: create iptables scripts
     copy:
       src: 'sbin/{{ item }}.sh'

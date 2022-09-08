@@ -161,6 +161,8 @@ iptables_net4_prvcan: {}
 iptables_net6_prvcan: {}
 iptables_net4_san: {}
 iptables_net6_san: {}
+iptables_net4_cun: {}
+iptables_net6_cun: {}
 iptables_net4_srv: {}
 iptables_net6_srv: {}
 iptables_net4_lan: {}
@@ -210,6 +212,19 @@ iptables_o_udp_adm:
 Refer to `defaults/main/40-ports.yml` for a complete list of variables and their defaults.
 
 The default is to deny all ports, except the inbound TCP port `22` (ssh) for the admin network. Should you forget or fail to configure an admin network, ssh connections will be accepted from any network. This serves as a failsave to hopefully prevent you from locking yourself out of the target host.
+
+## Custom rules
+
+Refer to `defaults/main/50-rules.yml` for a complete list of variables and their defaults.
+
+Use this to insert custom rules into chains. Example:
+
+```yaml
+iptables_rules_raw:
+  - -I OUTPUT -j CT -p udp -m udp --dport 69 --helper tftp
+iptables_rules_filter:
+  - -4 -I INPUT -s 1.2.3.4 -j DROP
+```
 
 ## Example configuration
 

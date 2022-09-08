@@ -1,0 +1,7 @@
+# rules to insert into chains
+# format: list of strings (iptables rules suitable for iptables-restore)
+
+iptables_rules_raw: []
+iptables_rules_nat: []
+iptables_rules_mangle: []
+iptables_rules_filter: []
