@@ -1,5 +1,8 @@
 ---
-- block:
+- name: block for iptables tag
+  tags: iptables
+  when: role_iptables
+  block:
 
   - name: check if iptables-legacy is present
     stat:
@@ -51,7 +54,9 @@
       - 10-static
 
   - name: create directory /etc/iptables/rules.d
-    file: path=/etc/iptables/rules.d state=directory
+    file:
+      path: /etc/iptables/rules.d
+      state: directory
 
   - name: create iptables rules generate scripts
     copy:
@@ -167,6 +172,3 @@
     # As async is not compatible with check mode, we disable it there.
     async: "{{ ansible_check_mode | ternary(0, 10) }}"
     poll: 1
-
-  tags: iptables
-  when: role_iptables

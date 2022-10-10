@@ -1,12 +1,17 @@
 ---
 - name: restart iptables
-  service: name=iptables state=restarted
+  service:
+    name: iptables
+    state: restarted
   async: 10
   poll: 1
   when: not ansible_check_mode
 
 - name: restart rsyslog
-  service: name=rsyslog state=restarted
+  service:
+    name: rsyslog
+    state: restarted
 
 - name: reload systemd
-  systemd: daemon_reload=yes
+  systemd:
+    daemon_reload: yes
