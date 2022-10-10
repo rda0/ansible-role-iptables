@@ -30,6 +30,9 @@
     file:
       path: /etc/iptables
       state: directory
+      owner: root
+      group: root
+      mode: 0755
 
   - name: create iptables config
     template:
@@ -42,6 +45,9 @@
     file:
       path: /etc/iptables/ipsets.d
       state: directory
+      owner: root
+      group: root
+      mode: 0755
 
   - name: create ipsets generate scripts
     copy:
@@ -57,6 +63,9 @@
     file:
       path: /etc/iptables/rules.d
       state: directory
+      owner: root
+      group: root
+      mode: 0755
 
   - name: create iptables rules generate scripts
     copy:
@@ -118,22 +127,34 @@
     copy:
       src: log/rsyslog.conf
       dest: /etc/rsyslog.d/00-iptables.conf
+      owner: root
+      group: root
+      mode: 0644
     notify: restart rsyslog
 
   - name: create iptables logrotate config
     copy:
       src: log/logrotate.conf
       dest: /etc/logrotate.d/iptables.conf
+      owner: root
+      group: root
+      mode: 0644
 
   - name: create directory /etc/systemd/system/libvirtd.service.d
     file:
       path: /etc/systemd/system/libvirtd.service.d
       state: directory
+      owner: root
+      group: root
+      mode: 0755
 
   - name: create systemd libvirtd.service override
     copy:
       src: service/libvirtd.service.override.conf
       dest: /etc/systemd/system/libvirtd.service.d/override.conf
+      owner: root
+      group: root
+      mode: 0644
     register: systemd_libvirtd_service_override
     notify: reload systemd
 
@@ -141,11 +162,17 @@
     file:
       path: /etc/systemd/system/fail2ban.service.d
       state: directory
+      owner: root
+      group: root
+      mode: 0755
 
   - name: create systemd fail2ban.service override
     copy:
       src: service/fail2ban.service.override.conf
       dest: /etc/systemd/system/fail2ban.service.d/override.conf
+      owner: root
+      group: root
+      mode: 0644
     register: systemd_fail2ban_service_override
     notify: reload systemd
 
@@ -153,11 +180,17 @@
     file:
       path: /etc/systemd/system/docker.service.d
       state: directory
+      owner: root
+      group: root
+      mode: 0755
 
   - name: create systemd docker.service override
     copy:
       src: service/docker.service.override.conf
       dest: /etc/systemd/system/docker.service.d/override.conf
+      owner: root
+      group: root
+      mode: 0644
     register: systemd_docker_service_override
     notify: reload systemd
 
