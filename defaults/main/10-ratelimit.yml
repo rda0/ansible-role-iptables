@@ -5,6 +5,7 @@
 iptables_lim_on: true
 iptables_lim_ports: ssh
 iptables_lim_nets: can any
+iptables_lim_nets_exclude: ''
 iptables_lim_ssh_can_on: true
 iptables_lim_ssh_any_on: true
 iptables_lim_ssh_can_secs: 60

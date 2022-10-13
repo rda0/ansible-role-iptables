@@ -6,7 +6,14 @@ if [[ -n "${lim[on]}" ]]; then
   echo -e "-4 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm4 src -j i-lim-ssh"
   echo -e "-6 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm6 src -j i-lim-ssh"
 
-  echo -e "# Track connection source in ssh-rate recent table"  
+  if [[ -n "${lim[nets_exclude]}" ]]; then
+    echo -e "# Exclude networks from rate limiting"
+    for n in ${lim[nets_exclude]}; do
+      echo -e "-A i-lim-ssh  -m set   --match-set ${n} src -j RETURN"
+    done
+  fi
+
+  echo -e "# Track connection source in ssh-rate recent table"
   echo -e "-A i-lim-ssh  -m recent --set --name lim-ssh"
 
   if [[ -n "${lim[ssh_can_on]}" ]]; then
