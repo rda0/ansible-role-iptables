@@ -140,59 +140,24 @@
       group: root
       mode: 0644
 
-  - name: create directory /etc/systemd/system/libvirtd.service.d
+  - name: create systemd other services override directories
     file:
-      path: /etc/systemd/system/libvirtd.service.d
+      path: '/etc/systemd/system/{{ item }}.service.d'
       state: directory
       owner: root
       group: root
       mode: 0755
+    loop: '{{ iptables_systemd_other_services_override }}'
 
-  - name: create systemd libvirtd.service override
+  - name: create systemd other services override
     copy:
-      src: service/libvirtd.service.override.conf
-      dest: /etc/systemd/system/libvirtd.service.d/override.conf
+      src: service/other.service.override.conf
+      dest: '/etc/systemd/system/{{ item }}.service.d/override.conf'
       owner: root
       group: root
       mode: 0644
-    register: systemd_libvirtd_service_override
     notify: reload systemd
-
-  - name: create directory /etc/systemd/system/fail2ban.service.d
-    file:
-      path: /etc/systemd/system/fail2ban.service.d
-      state: directory
-      owner: root
-      group: root
-      mode: 0755
-
-  - name: create systemd fail2ban.service override
-    copy:
-      src: service/fail2ban.service.override.conf
-      dest: /etc/systemd/system/fail2ban.service.d/override.conf
-      owner: root
-      group: root
-      mode: 0644
-    register: systemd_fail2ban_service_override
-    notify: reload systemd
-
-  - name: create directory /etc/systemd/system/docker.service.d
-    file:
-      path: /etc/systemd/system/docker.service.d
-      state: directory
-      owner: root
-      group: root
-      mode: 0755
-
-  - name: create systemd docker.service override
-    copy:
-      src: service/docker.service.override.conf
-      dest: /etc/systemd/system/docker.service.d/override.conf
-      owner: root
-      group: root
-      mode: 0644
-    register: systemd_docker_service_override
-    notify: reload systemd
+    loop: '{{ iptables_systemd_other_services_override }}'
 
   - name: enable systemd iptables.service
     systemd:

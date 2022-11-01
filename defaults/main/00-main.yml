@@ -26,14 +26,17 @@ iptables_snat_source_network:
 
 # unidirectional filtering, allow all outbound
 # format: [ true|false ]
-
 iptables_allow_o_any: false
 
 # ip spoofing protection for private address ranges
-
 iptables_deny_i_prv: true
 
 # enable deny target DROP, default is: REJECT
 # format: [ true|false ]
-
 iptables_deny_target_drop: false
+
+# override other systemd services as part of iptables service
+iptables_systemd_other_services_override:
+  - libvirtd
+  - fail2ban
+  - docker
