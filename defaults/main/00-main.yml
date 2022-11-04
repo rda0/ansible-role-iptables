@@ -40,3 +40,4 @@ iptables_systemd_other_services_override:
   - libvirtd
   - fail2ban
   - docker
+  - lxd
