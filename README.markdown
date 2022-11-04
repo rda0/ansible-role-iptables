@@ -35,7 +35,7 @@ This role is not intended for routers with lots of interfaces which would requir
 - Multiple interfaces: All interfaces are protected automatically
 - Persistent accross reboots: started/stopped/restarted using a systemd service unit
 - Error handling: if a service restart fails after a config change it falls back to the last working configuration
-- Integrates with other service units: fail2ban, libvirtd
+- Integrates with other service units: fail2ban, libvirtd, lxd, docker
 - Port rate limiting: protects sensitive ports like ssh from bruteforce attacks
 - Extensive logging: all denied packets can be logged (depending on the configured loglevel)
 - Logging DOS protection: all types of denied packets are limited by a separately configurable rate limit
@@ -49,6 +49,23 @@ Planned features (not implemented yet):
 - Possiblity to define services (instead of protocols and ports)
 - Possiblity to use this role as replacement for TCP wrappers
 - Rewrite code for interface configs (internal/external)
+
+## Manual usage
+
+For testing/development purposes changes can also be done locally.
+Edit the local config in `/etc/iptables/iptables.conf` and restart the service:
+
+```bash
+systemctl restart iptables.service
+```
+
+### Service dependencies
+
+Services listed in `iptables_systemd_other_services_override` will be chained as dependency of the `iptables` service.
+A temporal dependency (`After=`, `Before=`) is added so they start after `iptables.service`.
+A restart of `iptables.service` will also trigger a restart of the dependants (which are `PartOf=iptables.service`).
+A stop of `iptables.service` will also stop dependants and a start pulls in dependants via a weak dependency (`Wants=`)
+so they are started as well.
 
 ## Variables
 

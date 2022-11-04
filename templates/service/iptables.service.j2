@@ -1,9 +1,11 @@
 [Unit]
-Description=Initializes iptables rules
+Description=Iptables rules
 DefaultDependencies=no
-Before=network-pre.target fail2ban.service libvirtd.service
-Wants=network-pre.target fail2ban.service libvirtd.service
-Wants=systemd-modules-load.service local-fs.target
+Wants=systemd-modules-load.service local-fs.target network-pre.target
+{% for service in iptables_systemd_other_services_override %}
+Wants={{ service }}.service
+{% endfor %}
+Before=network-pre.target
 After=systemd-modules-load.service local-fs.target
 Conflicts=shutdown.target
 Before=shutdown.target
