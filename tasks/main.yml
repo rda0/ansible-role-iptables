@@ -10,7 +10,7 @@
     register: iptables_legacy
 
   - name: select iptables-legacy alternatives
-    alternatives:
+    community.general.alternatives:
       name: '{{ item.name }}'
       path: '/usr/sbin/{{ item.path }}'
     loop:
