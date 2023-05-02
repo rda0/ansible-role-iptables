@@ -45,9 +45,9 @@ for n in ${nets} any; do
       fi
     done
   done
-  [[ -n "${ch[i]}" ]] &&                                     echo -e "-A i-net-${n} -j RETURN"
-  [[ -n "${ch[o]}" ]] && [[ "${allow_o_any}" != "true" ]] && echo -e "-A o-net-${n} -j RETURN"
-  [[ -n "${ch[f]}" ]] &&                                     echo -e "-A f-net-${n} -j RETURN"
+  #[[ -n "${ch[i]}" ]] &&                                     echo -e "-A i-net-${n} -j RETURN"
+  #[[ -n "${ch[o]}" ]] && [[ "${allow_o_any}" != "true" ]] && echo -e "-A o-net-${n} -j RETURN"
+  #[[ -n "${ch[f]}" ]] &&                                     echo -e "-A f-net-${n} -j RETURN"
 done
 
 for n in ${cnets}; do

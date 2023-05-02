@@ -41,3 +41,7 @@ iptables_systemd_other_services_override:
   - fail2ban
   - docker
   - lxd
+
+# delete all existing rule scripts before recreate them
+# Use this if you need to clean up after changing file names etc
+iptables_recreate_rules: false

@@ -271,9 +271,7 @@ iptables_endpoints:
 
 ## Custom rules
 
-Refer to `defaults/main/50-rules.yml` for a complete list of variables and their defaults.
-
-Use this to insert custom rules into chains. Example:
+Use this to insert custom rules into tables. These rules are added at the very beginning of a table. Example:
 
 ```yaml
 iptables_rules_raw:
@@ -281,6 +279,8 @@ iptables_rules_raw:
 iptables_rules_filter:
   - -4 -I INPUT -s 1.2.3.4 -j DROP
 ```
+
+There is also `iptables_rules_custom` for a more fine grained control how to insert custom rules. Refer to `defaults/main/50-rules.yml` for a complete list of variables and their defaults.
 
 ## Example configuration
 

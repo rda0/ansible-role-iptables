@@ -90,5 +90,3 @@ fi
 echo -e "-A i-deny   -j RETURN"
 echo -e "-A f-deny   -j RETURN"
 [[ "${allow_o_any}" != "true" ]] && echo -e "-A o-deny   -j RETURN"
-
-echo -ne '\nCOMMIT\n\n'

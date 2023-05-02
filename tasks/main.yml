@@ -59,6 +59,12 @@
       - 00-dynamic
       - 10-static
 
+  - name: wipe rules
+    file:
+      path: /etc/iptables/rules.d
+      state: absent
+    when: iptables_recreate_rules
+
   - name: create directory /etc/iptables/rules.d
     file:
       path: /etc/iptables/rules.d
@@ -69,38 +75,32 @@
 
   - name: create iptables rules generate scripts
     copy:
-      src: 'rules.d/{{ item }}.sh'
-      dest: '/etc/iptables/rules.d/{{ item }}'
+      src: '{{ item }}'
+      dest: '/etc/iptables/rules.d/{{ item | basename }}'
       mode: '0644'
     notify: restart iptables
-    loop:
-      - 00-raw-policy
-      - 10-raw-rule
-      - 20-nat-policy
-      - 30-nat-rule
-      - 40-mangle-policy
-      - 50-mangle-rule
-      - 60-filter-policy
-      - 70-filter-rule-head-common
-      - 71-filter-rule-head-accept
-      - 72-filter-rule-head-invalid
-      - 73-filter-rule-head-private
-      - 74-filter-rule-head-icmp
-      - 75-filter-rule-head-ratelimit
-      - 76-filter-rule-body
-      - 77-filter-rule-tail
+    with_fileglob:
+      - rules.d/*.sh
 
   - name: deploy iptables rules custom scripts
     template:
       src: 'rules.d/{{ item }}.sh.j2'
-      dest: '/etc/iptables/rules.d/{{ item }}'
+      dest: '/etc/iptables/rules.d/{{ item }}.sh'
       mode: '0644'
     notify: restart iptables
     loop:
-      - 05-raw-rule-custom
-      - 25-nat-rule-custom
-      - 45-mangle-rule-custom
-      - 65-filter-rule-custom
+      - 110-raw-rule-custom
+      - 210-nat-rule-custom
+      - 410-mangle-rule-custom
+      - 710-filter-rule-custom
+
+  - name: deploy iptables rules custom prio scripts
+    template:
+      src: rules.d/xxx-custom.sh.j2
+      dest: '/etc/iptables/rules.d/{{ item.prio }}-rule-custom.sh'
+      mode: '0644'
+    notify: restart iptables
+    loop: "{{ iptables_rules_custom }}"
 
   - name: create iptables scripts
     copy:
