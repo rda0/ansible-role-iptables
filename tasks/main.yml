@@ -25,6 +25,7 @@
       pkg:
       - iptables
       - ipset
+      - rsyslog
 
   - name: create directory /etc/iptables
     file:
