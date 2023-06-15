@@ -1,8 +1,14 @@
----
 - name: block for iptables tag
   tags: iptables
   when: role_iptables
   block:
+
+  - name: install required pkgs for iptables
+    package:
+      pkg:
+      - iptables
+      - ipset
+      - rsyslog
 
   - name: check if iptables-legacy is present
     stat:
@@ -19,13 +25,6 @@
       - name: ip6tables
         path: ip6tables-legacy
     when: iptables_legacy.stat.exists
-
-  - name: install required pkgs for iptables
-    package:
-      pkg:
-      - iptables
-      - ipset
-      - rsyslog
 
   - name: create directory /etc/iptables
     file:
