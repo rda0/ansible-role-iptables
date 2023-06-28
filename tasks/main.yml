@@ -202,7 +202,7 @@
     notify: reload systemd
     loop: '{{ iptables_systemd_other_services_override }}'
 
-  - name: enable systemd iptables.service
+  - name: enable and start systemd iptables.service
     systemd:
       enabled: yes
       state: started
