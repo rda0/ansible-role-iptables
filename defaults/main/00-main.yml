@@ -23,6 +23,9 @@ iptables_allow_physdev_in_interfaces:
 # Accept any traffic on specific interfaces
 iptables_allow_interfaces:
 
+# Accept DHCPv6 traffic with link-local destination
+iptables_allow_dhcpv6: false
+
 # Configure IPv4 SNAT (source network address translation)
 iptables_snat_ipv4:
 iptables_snat_out_interface:

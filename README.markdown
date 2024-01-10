@@ -142,6 +142,28 @@ All traffic originating from tuntap interfaces will be accepted.
 iptables_allow_interfaces: eno3
 ```
 
+### Allow DHCPv6 traffic
+
+Allow outbound multicast DHCPv6 and inbound DHCPv6 with link-local destination.
+The default is `false`.
+
+```yaml
+iptables_allow_dhcpv6: True
+```
+
+DHCPv6 solicit is multicast ([RFC3315 5.1](https://datatracker.ietf.org/doc/html/rfc3315#section-5.1)) and
+advertise is unicast (link-local) which is a problem for conntracking.
+There seems to be no conntrack module available that could allow stateful matching of inbound packets.
+Possibly because DHCPv6 has server-initiated configuration messages, see
+[RFC3315 19](https://datatracker.ietf.org/doc/html/rfc3315#section-19)).
+The server could offer the unicast option which is not handled by our rules, see
+[RFC3315 1.1](https://datatracker.ietf.org/doc/html/rfc3315#section-1.1]),
+[RFC3315 22.12](https://datatracker.ietf.org/doc/html/rfc3315#section-22.12).
+
+Also refer to the following links for more background:
+[fedora](https://bugzilla.redhat.com/show_bug.cgi?id=591630),
+[stackexchange](https://unix.stackexchange.com/a/452905/60293).
+
 
 ## Networks
 
