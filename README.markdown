@@ -151,14 +151,14 @@ The default is `false`.
 iptables_allow_dhcpv6: True
 ```
 
-DHCPv6 solicit is multicast ([RFC3315 5.1](https://datatracker.ietf.org/doc/html/rfc3315#section-5.1)) and
+DHCPv6 solicit is multicast ([RFC8415 7.1](https://datatracker.ietf.org/doc/html/rfc8415#section-7.1)) and
 advertise is unicast (link-local) which is a problem for conntracking.
 There seems to be no conntrack module available that could allow stateful matching of inbound packets.
 Possibly because DHCPv6 has server-initiated configuration messages, see
-[RFC3315 19](https://datatracker.ietf.org/doc/html/rfc3315#section-19)).
+[RFC8415 18.3.11](https://datatracker.ietf.org/doc/html/rfc8415#section-18.3.11)).
 The server could offer the unicast option which is not handled by our rules, see
-[RFC3315 1.1](https://datatracker.ietf.org/doc/html/rfc3315#section-1.1]),
-[RFC3315 22.12](https://datatracker.ietf.org/doc/html/rfc3315#section-22.12).
+[RFC8415 5](https://datatracker.ietf.org/doc/html/rfc8415#section-5),
+[RFC8415 21.12](https://datatracker.ietf.org/doc/html/rfc8415#section-21.12).
 
 Also refer to the following links for more background:
 [fedora](https://bugzilla.redhat.com/show_bug.cgi?id=591630),
