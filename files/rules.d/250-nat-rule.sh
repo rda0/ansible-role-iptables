@@ -2,7 +2,9 @@
 
 if [[ "${snat_ipv4}" != "" ]] && [[ "${snat_out_if}" != "" ]] && [[ "${snat_src_net}" != "" ]]; then
   echo -e "# Enable SNAT"
-  echo -e "-4 -A POSTROUTING -s ${snat_src_net} -o ${snat_out_if} -j SNAT --to-source ${snat_ipv4}"
+  for n in ${snat_src_net}; do
+    echo -e "-4 -A POSTROUTING -s ${n} -o ${snat_out_if} -j SNAT --to-source ${snat_ipv4}"
+  done
   echo -ne '\n'
 fi
 
