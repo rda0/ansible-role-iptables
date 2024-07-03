@@ -15,7 +15,6 @@
       path: /usr/sbin/iptables-legacy
     register: iptables_legacy
 
-  # At least on buster iptables-legacy is still needed
   # Warning: Switching already running iptables-nft to iptables-legacy may break any subsequent restarts
   # Manually fix failed iptables.service with:
   #   apt install nftables
