@@ -74,7 +74,7 @@
       state: directory
       owner: root
       group: root
-      mode: 0755
+      mode: '0755'
 
   - name: create iptables config
     template:
@@ -89,7 +89,7 @@
       state: directory
       owner: root
       group: root
-      mode: 0755
+      mode: '0755'
 
   - name: create ipsets generate scripts
     copy:
@@ -113,7 +113,7 @@
       state: directory
       owner: root
       group: root
-      mode: 0755
+      mode: '0755'
 
   - name: create iptables rules generate scripts
     copy:
@@ -171,7 +171,7 @@
       dest: /etc/rsyslog.d/00-iptables.conf
       owner: root
       group: root
-      mode: 0644
+      mode: '0644'
     notify: restart rsyslog
 
   - name: create iptables logrotate config
@@ -180,7 +180,7 @@
       dest: /etc/logrotate.d/iptables.conf
       owner: root
       group: root
-      mode: 0644
+      mode: '0644'
 
   - name: create systemd other services override directories
     file:
@@ -188,7 +188,7 @@
       state: directory
       owner: root
       group: root
-      mode: 0755
+      mode: '0755'
     loop: '{{ iptables_systemd_other_services_override }}'
 
   - name: create systemd other services override
@@ -197,7 +197,7 @@
       dest: '/etc/systemd/system/{{ item }}.service.d/override.conf'
       owner: root
       group: root
-      mode: 0644
+      mode: '0644'
     notify: reload systemd
     loop: '{{ iptables_systemd_other_services_override }}'
 
