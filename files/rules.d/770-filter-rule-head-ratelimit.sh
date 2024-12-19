@@ -18,12 +18,6 @@ if [[ -n "${lim[on]}" ]]; then
 
   if [[ -n "${lim[ssh_can_on]}" ]]; then
     echo -e "# Check if source (can) exceeds threshold -> add to set ban-ssh-can, log"
-    echo -e "-A i-lim-ssh  -m set   --match-set can src \
-             -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_can_secs]} \
-             --hitcount ${lim[ssh_can_hits]} \
-             --name lim-ssh \
-             -j SET --add-set ban-ssh-can src --exist"
     [[ "${LOG_LEVEL}" > "${log[i_lim_ssh_can_lvl]}" ]] && echo -e "\
              -A i-lim-ssh  -m set   --match-set can src \
              -m recent --rcheck --rttl \
@@ -32,16 +26,25 @@ if [[ -n "${lim[on]}" ]]; then
              --name lim-ssh \
              -m limit --limit ${log[i_lim_ssh_limit]} --limit-burst ${log[i_lim_ssh_burst]} \
              -j LOG ${LOG_OPTS} \"[ipt-i]lim-ssh-can: \""
+    [[ "${LOG_LEVEL}" > "${log[i_ban_ssh_can_lvl]}" ]] && echo -e "\
+             -A i-lim-ssh  -m set   --match-set can src \
+             -m set ! --match-set ban-ssh-can src \
+             -m recent --rcheck --rttl \
+             --seconds ${lim[ssh_can_secs]} \
+             --hitcount ${lim[ssh_can_hits]} \
+             --name lim-ssh \
+             -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
+             -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-can: \""
+    echo -e "-A i-lim-ssh  -m set   --match-set can src \
+             -m recent --rcheck --rttl \
+             --seconds ${lim[ssh_can_secs]} \
+             --hitcount ${lim[ssh_can_hits]} \
+             --name lim-ssh \
+             -j SET --add-set ban-ssh-can src --exist"
   fi
 
   if [[ -n "${lim[ssh_any_on]}" ]]; then
     echo -e "# Check if source (not can) exceeds threshold -> add to set ban-ssh-any, log"
-    echo -e "-A i-lim-ssh  -m set ! --match-set can src \
-             -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_any_secs]} \
-             --hitcount ${lim[ssh_any_hits]} \
-             --name lim-ssh \
-             -j SET --add-set ban-ssh-any src --exist"
     [[ "${LOG_LEVEL}" > "${log[i_lim_ssh_any_lvl]}" ]] && echo -e "\
              -A i-lim-ssh  -m set ! --match-set can src \
              -m recent --rcheck --rttl \
@@ -50,6 +53,21 @@ if [[ -n "${lim[on]}" ]]; then
              --name lim-ssh \
              -m limit --limit ${log[i_lim_ssh_limit]} --limit-burst ${log[i_lim_ssh_burst]} \
              -j LOG ${LOG_OPTS} \"[ipt-i]lim-ssh-any: \""
+    [[ "${LOG_LEVEL}" > "${log[i_ban_ssh_any_lvl]}" ]] && echo -e "\
+             -A i-lim-ssh  -m set ! --match-set can src \
+             -m set ! --match-set ban-ssh-any src \
+             -m recent --rcheck --rttl \
+             --seconds ${lim[ssh_any_secs]} \
+             --hitcount ${lim[ssh_any_hits]} \
+             --name lim-ssh \
+             -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
+             -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-any: \""
+    echo -e "-A i-lim-ssh  -m set ! --match-set can src \
+             -m recent --rcheck --rttl \
+             --seconds ${lim[ssh_any_secs]} \
+             --hitcount ${lim[ssh_any_hits]} \
+             --name lim-ssh \
+             -j SET --add-set ban-ssh-any src --exist"
   fi
 
   echo -e "# Deny connections from sources in block-ssh* tables"

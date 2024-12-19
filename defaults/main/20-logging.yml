@@ -17,6 +17,7 @@ iptables_log_lvl_output: 0
 iptables_log_lvl_forward: 1
 iptables_log_lvl_input: 2
 iptables_log_lvl_special: 3
+iptables_log_lvl_ban_ssh: 2
 
 # log levels [ofi] (output, forward, input)
 #iptables_log_{[ofi]_deny,[ofi]_invalid,[fi]_any_s_prv}_lvl
@@ -29,6 +30,8 @@ iptables_log_f_invalid_lvl: ${log_lvl_forward}
 iptables_log_i_invalid_lvl: ${log_lvl_input}
 iptables_log_i_lim_ssh_can_lvl: ${log_lvl_special}
 iptables_log_i_lim_ssh_any_lvl: ${log_lvl_special}
+iptables_log_i_ban_ssh_can_lvl: ${log_lvl_ban_ssh}
+iptables_log_i_ban_ssh_any_lvl: ${log_lvl_ban_ssh}
 iptables_log_f_any_s_prv_lvl: ${log_lvl_forward}
 iptables_log_i_any_s_prv_lvl: ${log_lvl_input}
 iptables_log_i_bcast_lvl: ${log_lvl_special}
