@@ -112,7 +112,7 @@ If you do not have bridges, the defaults are fine (you do not need to specify an
 From `defaults/main/00-main.yml`:
 
 ```yaml
-iptables_allow_bridge_interfaces:
+iptables_allow_bridge_interfaces: ''
 ```
 
 ### Using bridged interfaces
@@ -243,10 +243,10 @@ Here the 4 variables for the admin network (inbound, outbound) as an example:
 # open ports (input/output)
 # format: [ port | port-range ... ]
 
-iptables_i_tcp_adm:
-iptables_i_udp_adm:
-iptables_o_tcp_adm:
-iptables_o_udp_adm:
+iptables_i_tcp_adm: ''
+iptables_i_udp_adm: ''
+iptables_o_tcp_adm: ''
+iptables_o_udp_adm: ''
 ```
 
 Refer to `defaults/main/40-ports.yml` for a complete list of variables and their defaults.
@@ -365,8 +365,8 @@ iptables_i_tcp_adm: 22
 # mosh
 iptables_i_udp_adm: 60000:61000
 # ssh
-iptables_o_tcp_adm:
-iptables_o_udp_adm:
+iptables_o_tcp_adm: ''
+iptables_o_udp_adm: ''
 
 # ssh
 iptables_i_tcp_srv: 22
@@ -377,15 +377,15 @@ iptables_o_tcp_srv: 88 749 464 389 636
 # ntp syslog kdc kadmin kpasswd ldap ldaps
 iptables_o_udp_srv: 123 514 88 749 464 389 636
 
-iptables_i_tcp_can:
-iptables_i_udp_can:
+iptables_i_tcp_can: ''
+iptables_i_udp_can: ''
 # dhcp
 iptables_o_tcp_can: 67
 # dhcp
 iptables_o_udp_can: 67
 
-iptables_i_tcp_any:
-iptables_i_udp_any:
+iptables_i_tcp_any: ''
+iptables_i_udp_any: ''
 # ssh smtp whois dns rwhois http https git gpg
 iptables_o_tcp_any: 22 25 43 53 4321 80 443 9418 11371
 # whois dns ntp
