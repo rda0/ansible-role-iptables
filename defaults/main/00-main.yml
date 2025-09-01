@@ -2,9 +2,7 @@
 role_iptables: True
 
 # use alternative iptables-legacy instead of iptables-nft (on newer releases)
-iptables_alternative_legacy: True
-# TODO: possibly migrate to iptables-nft starting with bookworm and jammy:
-#iptables_alternative_legacy: "{{ True if ansible_distribution_release in ['bullseye', 'focal'] else False }}"
+iptables_alternative_legacy: True  # TODO: possibly migrate to iptables-nft starting with bookworm
 
 # interfaces
 # format: [ interface ... ]
