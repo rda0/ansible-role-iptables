@@ -100,6 +100,7 @@
     loop:
       - 00-dynamic
       - 10-static
+      - 20-as
 
   - name: wipe rules
     file:
@@ -156,6 +157,7 @@
       - iptables-stop
       - iptables-flush
       - ipsets-flush
+      - ipset-refresh
 
   - name: create iptables systemd service file
     template:
@@ -212,3 +214,27 @@
     # As async is not compatible with check mode, we disable it there.
     async: "{{ ansible_check_mode | ternary(0, 10) }}"
     poll: 1
+
+  - name: create ipset systemd service and timer
+    template:
+      src: 'service/{{ item }}.j2'
+      dest: '/etc/systemd/system/{{ item }}'
+      owner: root
+      group: root
+      mode: '0644'
+    loop:
+      - ipset.service
+      - ipset.timer
+
+  - name: update ipset systemd service enabled state
+    systemd:
+      enabled: "{{ iptables_lim_as_on }}"
+      daemon_reload: yes
+      name: ipset.service
+
+  - name: update ipset systemd timer enabled and started state
+    systemd:
+      enabled: "{{ iptables_lim_as_on }}"
+      state: "{{ iptables_lim_as_on | ternary('started', 'stopped') }}"
+      daemon_reload: yes
+      name: ipset.timer

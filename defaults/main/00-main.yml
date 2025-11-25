@@ -50,3 +50,6 @@ iptables_systemd_other_services_override:
 # delete all existing rule scripts before recreate them
 # Use this if you need to clean up after changing file names etc
 iptables_recreate_rules: false
+
+# systemd timer to refresh ipsets
+iptables_ipset_refresh_timer: 'Mon..Fri 12:00'

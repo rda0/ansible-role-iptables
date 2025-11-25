@@ -1,0 +1,14 @@
+[Unit]
+Description=Refresh ipsets for iptables
+Wants=network-online.target iptables.service
+After=network-online.target iptables.service
+# Ensure service is stopped when parent service stops
+PartOf=iptables.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/ipset-refresh
+
+[Install]
+# Make iptables "want" this service to start/restart when it does
+WantedBy=iptables.service

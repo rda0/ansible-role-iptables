@@ -13,3 +13,19 @@ iptables_lim_ssh_can_time: 600
 iptables_lim_ssh_any_secs: 120
 iptables_lim_ssh_any_hits: 5
 iptables_lim_ssh_any_time: 3600
+
+# as rate limits
+# Enable AS rate limits
+iptables_lim_as_on: false
+# Enable AS rate limits (UDP)
+iptables_lim_as_udp_on: false
+# Server to fetch AS subnets (`proto://server:[port]`)
+iptables_lim_as_server: http://localhost:53661
+# List of ASNs to limit with or without `AS` prefix
+iptables_lim_as_list: []
+# List of ports or leave empty to limit all ports
+iptables_lim_as_ports: ''
+# Maximum average rate[/second|/minute|/hour|/day]
+iptables_lim_as_rate: '200/minute'
+# Maximum initial number of packets to match
+iptables_lim_as_burst: '300'

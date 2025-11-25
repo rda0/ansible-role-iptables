@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh ipsets
+
+[Timer]
+{# TODO: randomize? #}
+OnCalendar={{ iptables_ipset_refresh_timer }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target
