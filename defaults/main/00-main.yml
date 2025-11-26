@@ -52,4 +52,5 @@ iptables_systemd_other_services_override:
 iptables_recreate_rules: false
 
 # systemd timer to refresh ipsets
-iptables_ipset_refresh_timer: 'Mon..Fri 12:00'
+iptables_ipset_refresh_timer_on_calendar: 'Mon..Fri 12:00'
+iptables_ipset_refresh_timer_randomized_delay_sec: 3600

@@ -2,8 +2,8 @@
 Description=Refresh ipsets
 
 [Timer]
-{# TODO: randomize? #}
-OnCalendar={{ iptables_ipset_refresh_timer }}
+OnCalendar={{ iptables_ipset_refresh_timer_on_calendar }}
+RandomizedDelaySec={{ iptables_ipset_refresh_timer_randomized_delay_sec }}
 Persistent=true
 
 [Install]
