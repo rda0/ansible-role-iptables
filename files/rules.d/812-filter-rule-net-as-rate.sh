@@ -1,10 +1,12 @@
 #!/bin/bash
+# rules.d/812-filter-rule-net-as-rate.sh
 
-# AS-based rate limiting for inbound traffic
+# AS-based rate limiting for inbound traffic with optional hard block
 # Uses:
 #  - lim_as[on]        enable/disable
 #  - lim_as[list]      list of ASNs (with or without "AS" prefix)
-#  - lim_as[ports]     ports to rate-limit; if empty -> limit all ports
+#  - lim_as[block]     subset of lim_as[list] to hard REJECT/DROP
+#  - lim_as[ports]     ports to rate-limit/block; if empty -> apply to all ports
 #  - lim_as[rate]      AS-global limit expression for -m limit (e.g. "100/minute")
 #  - lim_as[burst]     AS-global burst for -m limit (e.g. "100")
 #  - lim_as[udp_on]    also apply rules to UDP (otherwise TCP only)
@@ -27,6 +29,14 @@ if [[ -n "${lim_as[on]}" ]]; then
     [[ -z "${lim_as[ip_burst]}" ]] && lim_as[ip_burst]="20"
   }
 
+  # Normalize block list to digits for quick membership checks
+  declare -A as_block
+  for BASN in ${lim_as[block]}; do
+    bn="$(echo "${BASN}" | sed 's/^[Aa][Ss]//; s/[^0-9]//g')"
+    [[ -z "${bn}" ]] && continue
+    as_block["${bn}"]="1"
+  done
+
   for ASN in ${lim_as[list]}; do
     # normalize ASN: strip any leading AS/as and keep only digits
     as_num="$(echo "${ASN}" | sed 's/^[Aa][Ss]//; s/[^0-9]//g')"
@@ -38,6 +48,70 @@ if [[ -n "${lim_as[on]}" ]]; then
     echo -e "-4 -A i-lim-as -m set --match-set as${as_num}_4 src -j i-lim-as${as_num}"
     echo -e "-6 -A i-lim-as -m set --match-set as${as_num}_6 src -j i-lim-as${as_num}"
 
+    # If this ASN is in the block list, hard block (REJECT/DROP) instead of rate-limit
+    if [[ -n "${as_block[${as_num}]}" ]]; then
+      if [[ -n "${lim_as[ports]}" ]]; then
+        for p in ${lim_as[ports]}; do
+          # Logging (throttled)
+          [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+            -4 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} \
+            -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+            -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
+          [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+            -6 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} \
+            -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+            -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
+
+          if [[ "${deny_target_drop}" != "true" ]]; then
+            echo -e "-4 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} -j REJECT --reject-with icmp-admin-prohibited"
+            echo -e "-6 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} -j REJECT --reject-with icmp6-adm-prohibited"
+          else
+            echo -e "-A i-lim-as${as_num} -p tcp -m tcp --dport ${p} -j DROP"
+          fi
+
+          if [[ -n "${lim_as[udp_on]}" ]]; then
+            [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+              -4 -A i-lim-as${as_num} -p udp -m udp --dport ${p} \
+              -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+              -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
+            [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+              -6 -A i-lim-as${as_num} -p udp -m udp --dport ${p} \
+              -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+              -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
+
+            if [[ "${deny_target_drop}" != "true" ]]; then
+              echo -e "-4 -A i-lim-as${as_num} -p udp -m udp --dport ${p} -j REJECT --reject-with icmp-admin-prohibited"
+              echo -e "-6 -A i-lim-as${as_num} -p udp -m udp --dport ${p} -j REJECT --reject-with icmp6-adm-prohibited"
+            else
+              echo -e "-A i-lim-as${as_num} -p udp -m udp --dport ${p} -j DROP"
+            fi
+          fi
+        done
+      else
+        # No ports configured: block all inbound traffic from the AS
+        [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+          -4 -A i-lim-as${as_num} \
+          -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+          -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}: \""
+        [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+          -6 -A i-lim-as${as_num} \
+          -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+          -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}: \""
+
+        if [[ "${deny_target_drop}" != "true" ]]; then
+          echo -e "-4 -A i-lim-as${as_num} -j REJECT --reject-with icmp-admin-prohibited"
+          echo -e "-6 -A i-lim-as${as_num} -j REJECT --reject-with icmp6-adm-prohibited"
+        else
+          echo -e "-A i-lim-as${as_num} -j DROP"
+        fi
+      fi
+
+      # Allow unmatched traffic (e.g., other ports when ports are scoped)
+      echo -e "-A i-lim-as${as_num} -j RETURN"
+      continue
+    fi
+
+    # Not blocked: apply rate-limiting
     if [[ -n "${lim_as[ports]}" ]]; then
       # Limit only specific ports (tcp/udp)
       for p in ${lim_as[ports]}; do

@@ -37,7 +37,7 @@ This role is not intended for routers with lots of interfaces which would requir
 - Error handling: if a service restart fails after a config change it falls back to the last working configuration
 - Integrates with other service units: fail2ban, libvirtd, lxd, docker
 - Port rate limiting: protects sensitive ports like ssh from bruteforce attacks
-- Per AS rate-limiting: protects all ports or selected ports from selected ASNs (https://en.wikipedia.org/wiki/Autonomous_system_(Internet)), requires additional web API: https://github.com/rda0/iptoasn-webservice
+- Per AS rate-limiting/blocking: protects all ports or selected ports from selected ASNs (https://en.wikipedia.org/wiki/Autonomous_system_(Internet)), requires additional web API: https://github.com/rda0/iptoasn-webservice
 - Extensive logging: all denied packets can be logged (depending on the configured loglevel)
 - Logging DOS protection: all types of denied packets are limited by a separately configurable rate limit
 - Port forwarding rules: applicable for IPv4 only (experimental)
@@ -300,10 +300,14 @@ Use this to protect from DDOS by aggressive ASNs:
 
 ```yaml
 iptables_lim_as_on: true
-iptables_lim_as_list:
-  - ASnnn
-  - ASnnn
+iptables_lim_as_limit:
+  - ASnnn1
+  - ASnnn2
+iptables_lim_as_block:
+  - ASnnn3
 ```
+
+List ASNs with or without `AS` prefix.
 
 ## Custom rules
 

@@ -142,8 +142,10 @@ lim_as[on]="{{ iptables_lim_as_on | ternary('1', '') }}"
 lim_as[udp_on]="{{ iptables_lim_as_udp_on | ternary('1', '') }}"
 # Server to fetch AS subnets (`proto://server:[port]`)
 lim_as[server]="{{ iptables_lim_as_server }}"
-# List of ASNs to limit with or without `AS` prefix
-lim_as[list]="{{ iptables_lim_as_list | join(' ') }}"
+# List of ASNs to limit or block
+lim_as[list]="{{ _iptables_lim_as_list | join(' ') }}"
+# Selection of ASNs (subset of lim_as[list]) to hard block (REJECT/DROP)
+lim_as[block]="{{ iptables_lim_as_block | join(' ') }}"
 # List of ports or leave empty to limit all ports
 lim_as[ports]="{{ iptables_lim_as_ports }}"
 # Maximum average rate[/second|/minute|/hour|/day]

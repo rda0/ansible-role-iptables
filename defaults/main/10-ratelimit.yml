@@ -21,8 +21,12 @@ iptables_lim_as_on: false
 iptables_lim_as_udp_on: false
 # Server to fetch AS subnets (`proto://server:[port]`)
 iptables_lim_as_server: http://localhost:53661
-# List of ASNs to limit with or without `AS` prefix
-iptables_lim_as_list: []
+# Internal variable: List of all ASNs (limited and blocked)
+_iptables_lim_as_list: '{{ iptables_lim_as_block + iptables_lim_as_limit }}'
+# List of ASNs to rate-limit
+iptables_lim_as_limit: []
+# List of ASNs to hard block (REJECT/DROP)
+iptables_lim_as_block: []
 # List of ports or leave empty to limit all ports
 iptables_lim_as_ports: ''
 # Maximum average rate[/second|/minute|/hour|/day]
