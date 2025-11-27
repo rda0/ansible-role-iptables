@@ -150,6 +150,12 @@ lim_as[ports]="{{ iptables_lim_as_ports }}"
 lim_as[rate]="{{ iptables_lim_as_rate }}"
 # Maximum initial number of packets to match
 lim_as[burst]="{{ iptables_lim_as_burst }}"
+# Enable per-IP rate limits within AS rate limiting
+lim_as[ip_on]="{{ iptables_lim_as_ip_on | ternary('1', '') }}"
+# Per-IP rate [/second|/minute|/hour|/day]
+lim_as[ip_rate]="{{ iptables_lim_as_ip_rate }}"
+# Per-IP burst
+lim_as[ip_burst]="{{ iptables_lim_as_ip_burst }}"
 
 
 ### Networks (in CIDR notation)

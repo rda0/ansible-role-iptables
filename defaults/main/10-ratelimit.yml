@@ -26,6 +26,12 @@ iptables_lim_as_list: []
 # List of ports or leave empty to limit all ports
 iptables_lim_as_ports: ''
 # Maximum average rate[/second|/minute|/hour|/day]
-iptables_lim_as_rate: '200/minute'
+iptables_lim_as_rate: '40/minute'
 # Maximum initial number of packets to match
-iptables_lim_as_burst: '300'
+iptables_lim_as_burst: '40'
+# Enable per-IP rate limits within AS rate limiting
+iptables_lim_as_ip_on: true
+# Per-IP rate [/second|/minute|/hour|/day]
+iptables_lim_as_ip_rate: '10/minute'
+# Per-IP burst
+iptables_lim_as_ip_burst: '20'
