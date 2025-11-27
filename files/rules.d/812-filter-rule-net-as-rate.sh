@@ -53,13 +53,13 @@ if [[ -n "${lim_as[on]}" ]]; then
       if [[ -n "${lim_as[ports]}" ]]; then
         for p in ${lim_as[ports]}; do
           # Logging (throttled)
-          [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+          [[ "${LOG_LEVEL}" > "${log[i_lim_as_block_lvl]}" ]] && echo -e "\
             -4 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} \
-            -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+            -m limit --limit ${log[i_lim_as_block_limit]} --limit-burst ${log[i_lim_as_block_burst]} \
             -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
-          [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+          [[ "${LOG_LEVEL}" > "${log[i_lim_as_block_lvl]}" ]] && echo -e "\
             -6 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} \
-            -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+            -m limit --limit ${log[i_lim_as_block_limit]} --limit-burst ${log[i_lim_as_block_burst]} \
             -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
 
           if [[ "${deny_target_drop}" != "true" ]]; then
@@ -70,13 +70,13 @@ if [[ -n "${lim_as[on]}" ]]; then
           fi
 
           if [[ -n "${lim_as[udp_on]}" ]]; then
-            [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+            [[ "${LOG_LEVEL}" > "${log[i_lim_as_block_lvl]}" ]] && echo -e "\
               -4 -A i-lim-as${as_num} -p udp -m udp --dport ${p} \
-              -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+              -m limit --limit ${log[i_lim_as_block_limit]} --limit-burst ${log[i_lim_as_block_burst]} \
               -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
-            [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+            [[ "${LOG_LEVEL}" > "${log[i_lim_as_block_lvl]}" ]] && echo -e "\
               -6 -A i-lim-as${as_num} -p udp -m udp --dport ${p} \
-              -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+              -m limit --limit ${log[i_lim_as_block_limit]} --limit-burst ${log[i_lim_as_block_burst]} \
               -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}-p${p}: \""
 
             if [[ "${deny_target_drop}" != "true" ]]; then
@@ -89,13 +89,13 @@ if [[ -n "${lim_as[on]}" ]]; then
         done
       else
         # No ports configured: block all inbound traffic from the AS
-        [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+        [[ "${LOG_LEVEL}" > "${log[i_lim_as_block_lvl]}" ]] && echo -e "\
           -4 -A i-lim-as${as_num} \
-          -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+          -m limit --limit ${log[i_lim_as_block_limit]} --limit-burst ${log[i_lim_as_block_burst]} \
           -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}: \""
-        [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+        [[ "${LOG_LEVEL}" > "${log[i_lim_as_block_lvl]}" ]] && echo -e "\
           -6 -A i-lim-as${as_num} \
-          -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+          -m limit --limit ${log[i_lim_as_block_limit]} --limit-burst ${log[i_lim_as_block_burst]} \
           -j LOG ${LOG_OPTS} \"[ipt-i]block-as${as_num}: \""
 
         if [[ "${deny_target_drop}" != "true" ]]; then
@@ -154,22 +154,22 @@ if [[ -n "${lim_as[on]}" ]]; then
         fi
 
         # Logging when either limit is exceeded (throttled)
-        [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+        [[ "${LOG_LEVEL}" > "${log[i_lim_as_ratelimit_lvl]}" ]] && echo -e "\
           -4 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} \
-          -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+          -m limit --limit ${log[i_lim_as_ratelimit_limit]} --limit-burst ${log[i_lim_as_ratelimit_burst]} \
           -j LOG ${LOG_OPTS} \"[ipt-i]lim-as${as_num}-p${p}: \""
-        [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+        [[ "${LOG_LEVEL}" > "${log[i_lim_as_ratelimit_lvl]}" ]] && echo -e "\
           -6 -A i-lim-as${as_num} -p tcp -m tcp --dport ${p} \
-          -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+          -m limit --limit ${log[i_lim_as_ratelimit_limit]} --limit-burst ${log[i_lim_as_ratelimit_burst]} \
           -j LOG ${LOG_OPTS} \"[ipt-i]lim-as${as_num}-p${p}: \""
         if [[ -n "${lim_as[udp_on]}" ]]; then
-          [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+          [[ "${LOG_LEVEL}" > "${log[i_lim_as_ratelimit_lvl]}" ]] && echo -e "\
             -4 -A i-lim-as${as_num} -p udp -m udp --dport ${p} \
-            -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+            -m limit --limit ${log[i_lim_as_ratelimit_limit]} --limit-burst ${log[i_lim_as_ratelimit_burst]} \
             -j LOG ${LOG_OPTS} \"[ipt-i]lim-as${as_num}-p${p}: \""
-          [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+          [[ "${LOG_LEVEL}" > "${log[i_lim_as_ratelimit_lvl]}" ]] && echo -e "\
             -6 -A i-lim-as${as_num} -p udp -m udp --dport ${p} \
-            -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+            -m limit --limit ${log[i_lim_as_ratelimit_limit]} --limit-burst ${log[i_lim_as_ratelimit_burst]} \
             -j LOG ${LOG_OPTS} \"[ipt-i]lim-as${as_num}-p${p}: \""
         fi
 
@@ -207,13 +207,13 @@ if [[ -n "${lim_as[on]}" ]]; then
           -j RETURN"
       fi
 
-      [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+      [[ "${LOG_LEVEL}" > "${log[i_lim_as_ratelimit_lvl]}" ]] && echo -e "\
         -4 -A i-lim-as${as_num} \
-        -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+        -m limit --limit ${log[i_lim_as_ratelimit_limit]} --limit-burst ${log[i_lim_as_ratelimit_burst]} \
         -j LOG ${LOG_OPTS} \"[ipt-i]lim-as${as_num}: \""
-      [[ "${LOG_LEVEL}" > "${log[i_deny_lvl]}" ]] && echo -e "\
+      [[ "${LOG_LEVEL}" > "${log[i_lim_as_ratelimit_lvl]}" ]] && echo -e "\
         -6 -A i-lim-as${as_num} \
-        -m limit --limit ${log[i_deny_limit]} --limit-burst ${log[i_deny_burst]} \
+        -m limit --limit ${log[i_lim_as_ratelimit_limit]} --limit-burst ${log[i_lim_as_ratelimit_burst]} \
         -j LOG ${LOG_OPTS} \"[ipt-i]lim-as${as_num}: \""
 
       if [[ "${deny_target_drop}" != "true" ]]; then
