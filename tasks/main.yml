@@ -170,7 +170,7 @@
   - name: create iptables rsyslog config
     copy:
       src: log/rsyslog.conf
-      dest: /etc/rsyslog.d/00-iptables.conf
+      dest: /etc/rsyslog.d/90-iptables.conf
       owner: root
       group: root
       mode: '0644'
@@ -238,3 +238,10 @@
       state: "{{ iptables_lim_as_on | ternary('started', 'stopped') }}"
       daemon_reload: yes
       name: ipset.timer
+
+  - name: cleanup old files
+    file:
+      path: '{{ item }}'
+      state: absent
+    loop:
+      - /etc/rsyslog.d/00-iptables.conf
