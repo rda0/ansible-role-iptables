@@ -29,4 +29,4 @@ debug "flush iptables (required to destroy sets)"
 . "${SBIN}/iptables-flush"
 
 debug "flush ipsets"
-. "${SBIN}/ipsets-flush"
+. "${SBIN}/ipset-flush"

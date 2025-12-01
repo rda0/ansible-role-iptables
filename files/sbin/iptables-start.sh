@@ -47,7 +47,7 @@ debug "flush iptables"
 . "${SBIN}/iptables-flush"
 
 debug "flush ipsets"
-. "${SBIN}/ipsets-flush"
+. "${SBIN}/ipset-flush"
 
 # load the generated ipsets and rules
 
@@ -83,7 +83,7 @@ fi
 if [ "${ERROR}" != "0" ]; then
     >&2 echo "restoring dumped configuration"
     . "${SBIN}/iptables-flush"
-    . "${SBIN}/ipsets-flush"
+    . "${SBIN}/ipset-flush"
     /sbin/ipset restore -f "${IPSETS_DUMPED}"
     /sbin/iptables-restore "${RULES_4_DUMPED}"
     /sbin/ip6tables-restore "${RULES_6_DUMPED}"

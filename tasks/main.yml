@@ -20,7 +20,7 @@
   #   apt install nftables
   #   nft flush ruleset
   #   iptables-flush
-  #   ipsets-flush
+  #   ipset-flush
   #   systemctl restart iptables.service
   - name: select iptables-legacy alternatives
     community.general.alternatives:
@@ -51,7 +51,7 @@
   #   update-alternatives --config iptables   ->   set legacy
   #   nft flush ruleset
   #   iptables-flush
-  #   ipsets-flush
+  #   ipset-flush
   #   update-alternatives --config iptables   ->   set nft
   #   systemctl restart iptables.service
   - name: select iptables-nft alternatives (auto)
@@ -156,7 +156,7 @@
       - iptables-start
       - iptables-stop
       - iptables-flush
-      - ipsets-flush
+      - ipset-flush
       - ipset-refresh
 
   - name: create iptables systemd service file
@@ -245,3 +245,4 @@
       state: absent
     loop:
       - /etc/rsyslog.d/00-iptables.conf
+      - /usr/local/sbin/ipsets-flush
