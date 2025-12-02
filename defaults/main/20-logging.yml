@@ -7,8 +7,9 @@ iptables_debug: 0
 iptables_log_level: 2
 
 # logging options (`--log-prefix` always required as last option)
+# log-level: emerg, alert, crit, error, warning, notice, info or debug
 
-iptables_log_opts: '--log-level 7 --log-ip-options --log-uid --log-prefix'
+iptables_log_opts: '--log-level info --log-ip-options --log-uid --log-prefix'
 
 # log levels defaults (these are defaults used for next section `log levels`)
 # logged when: main log_level > individual lvl defined here
