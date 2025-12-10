@@ -380,8 +380,7 @@ iptables_net6_can:
 
 # ssh
 iptables_i_tcp_adm: 22
-# mosh
-iptables_i_udp_adm: 60000:61000
+iptables_i_udp_adm: ''
 # ssh
 iptables_o_tcp_adm: ''
 iptables_o_udp_adm: ''
