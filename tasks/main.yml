@@ -3,247 +3,247 @@
   when: role_iptables
   block:
 
-  - name: install required pkgs for iptables
-    package:
-      pkg:
-      - iptables
-      - ipset
-      - rsyslog
-      - conntrack
+    - name: install required pkgs for iptables
+      package:
+        pkg:
+          - iptables
+          - ipset
+          - rsyslog
+          - conntrack
 
-  - name: check if iptables-legacy is present
-    stat:
-      path: /usr/sbin/iptables-legacy
-    register: iptables_legacy
+    - name: check if iptables-legacy is present
+      stat:
+        path: /usr/sbin/iptables-legacy
+      register: iptables_legacy
 
-  # Warning: Switching already running iptables-nft to iptables-legacy may break any subsequent restarts
-  # Manually fix failed iptables.service with:
-  #   apt install nftables
-  #   nft flush ruleset
-  #   iptables-flush
-  #   ipset-flush
-  #   systemctl restart iptables.service
-  - name: select iptables-legacy alternatives
-    community.general.alternatives:
-      name: '{{ item.name }}'
-      path: '/usr/sbin/{{ item.path }}'
-    loop:
-      - name: iptables
-        path: iptables-legacy
-      - name: ip6tables
-        path: ip6tables-legacy
-    when:
-      - iptables_legacy.stat.exists
-      - iptables_alternative_legacy
+    # Warning: Switching already running iptables-nft to iptables-legacy may break any subsequent restarts
+    # Manually fix failed iptables.service with:
+    #   apt install nftables
+    #   nft flush ruleset
+    #   iptables-flush
+    #   ipset-flush
+    #   systemctl restart iptables.service
+    - name: select iptables-legacy alternatives
+      community.general.alternatives:
+        name: '{{ item.name }}'
+        path: '/usr/sbin/{{ item.path }}'
+      loop:
+        - name: iptables
+          path: iptables-legacy
+        - name: ip6tables
+          path: ip6tables-legacy
+      when:
+        - iptables_legacy.stat.exists
+        - iptables_alternative_legacy
 
-  - name: check if iptables-nft is present
-    stat:
-      path: /usr/sbin/iptables-nft
-    register: iptables_nft
+    - name: check if iptables-nft is present
+      stat:
+        path: /usr/sbin/iptables-nft
+      register: iptables_nft
 
-  # Previously alternatives were manually switched to iptables-legacy, which was unnecessary.
-  # Now the default (auto) is used, which uses iptables-nft on newer releases.
-  # Note that the code below will still use iptables-legacy on older releases (but `path` is required by ansible).
-  # iptables-nft is a 100% compatible drop-in replacement for the legacy command, but using nftables kernel api:
-  # https://developers.redhat.com/blog/2020/08/18/iptables-the-two-variants-and-their-relationship-with-nftables
-  #
-  # Warning: The migration to iptables-nft needs an immediate reboot, otherwise any subsequent restarts will fail!
-  # Manually fix failed iptables.service with:
-  #   update-alternatives --config iptables   ->   set legacy
-  #   nft flush ruleset
-  #   iptables-flush
-  #   ipset-flush
-  #   update-alternatives --config iptables   ->   set nft
-  #   systemctl restart iptables.service
-  - name: select iptables-nft alternatives (auto)
-    community.general.alternatives:
-      name: '{{ item.name }}'
-      path: '/usr/sbin/{{ item.path }}'
-      state: auto
-    loop:
-      - name: iptables
-        path: iptables-nft
-      - name: ip6tables
-        path: ip6tables-nft
-    when:
-      - iptables_nft.stat.exists
-      - not iptables_alternative_legacy
+    # Previously alternatives were manually switched to iptables-legacy, which was unnecessary.
+    # Now the default (auto) is used, which uses iptables-nft on newer releases.
+    # Note that the code below will still use iptables-legacy on older releases (but `path` is required by ansible).
+    # iptables-nft is a 100% compatible drop-in replacement for the legacy command, but using nftables kernel api:
+    # https://developers.redhat.com/blog/2020/08/18/iptables-the-two-variants-and-their-relationship-with-nftables
+    #
+    # Warning: The migration to iptables-nft needs an immediate reboot, otherwise any subsequent restarts will fail!
+    # Manually fix failed iptables.service with:
+    #   update-alternatives --config iptables   ->   set legacy
+    #   nft flush ruleset
+    #   iptables-flush
+    #   ipset-flush
+    #   update-alternatives --config iptables   ->   set nft
+    #   systemctl restart iptables.service
+    - name: select iptables-nft alternatives (auto)
+      community.general.alternatives:
+        name: '{{ item.name }}'
+        path: '/usr/sbin/{{ item.path }}'
+        state: auto
+      loop:
+        - name: iptables
+          path: iptables-nft
+        - name: ip6tables
+          path: ip6tables-nft
+      when:
+        - iptables_nft.stat.exists
+        - not iptables_alternative_legacy
 
-  - name: create directory /etc/iptables
-    file:
-      path: /etc/iptables
-      state: directory
-      owner: root
-      group: root
-      mode: '0755'
+    - name: create directory /etc/iptables
+      file:
+        path: /etc/iptables
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
 
-  - name: create iptables config
-    template:
-      src: iptables.conf.j2
-      dest: /etc/iptables/iptables.conf
-      mode: '0644'
-    notify: restart iptables
+    - name: create iptables config
+      template:
+        src: iptables.conf.j2
+        dest: /etc/iptables/iptables.conf
+        mode: '0644'
+      notify: restart iptables
 
-  - name: create directory /etc/iptables/ipsets.d
-    file:
-      path: /etc/iptables/ipsets.d
-      state: directory
-      owner: root
-      group: root
-      mode: '0755'
+    - name: create directory /etc/iptables/ipsets.d
+      file:
+        path: /etc/iptables/ipsets.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
 
-  - name: create ipsets generate scripts
-    copy:
-      src: 'ipsets.d/{{ item }}.sh'
-      dest: '/etc/iptables/ipsets.d/{{ item }}'
-      mode: '0644'
-    notify: restart iptables
-    loop:
-      - 00-dynamic
-      - 10-static
-      - 20-as
+    - name: create ipsets generate scripts
+      copy:
+        src: 'ipsets.d/{{ item }}.sh'
+        dest: '/etc/iptables/ipsets.d/{{ item }}'
+        mode: '0644'
+      notify: restart iptables
+      loop:
+        - 00-dynamic
+        - 10-static
+        - 20-as
 
-  - name: wipe rules
-    file:
-      path: /etc/iptables/rules.d
-      state: absent
-    when: iptables_recreate_rules
+    - name: wipe rules
+      file:
+        path: /etc/iptables/rules.d
+        state: absent
+      when: iptables_recreate_rules
 
-  - name: create directory /etc/iptables/rules.d
-    file:
-      path: /etc/iptables/rules.d
-      state: directory
-      owner: root
-      group: root
-      mode: '0755'
+    - name: create directory /etc/iptables/rules.d
+      file:
+        path: /etc/iptables/rules.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
 
-  - name: create iptables rules generate scripts
-    copy:
-      src: '{{ item }}'
-      dest: '/etc/iptables/rules.d/{{ item | basename }}'
-      mode: '0644'
-    notify: restart iptables
-    with_fileglob:
-      - rules.d/*.sh
+    - name: create iptables rules generate scripts
+      copy:
+        src: '{{ item }}'
+        dest: '/etc/iptables/rules.d/{{ item | basename }}'
+        mode: '0644'
+      notify: restart iptables
+      with_fileglob:
+        - rules.d/*.sh
 
-  - name: deploy iptables rules custom scripts
-    template:
-      src: 'rules.d/{{ item }}.sh.j2'
-      dest: '/etc/iptables/rules.d/{{ item }}.sh'
-      mode: '0644'
-    notify: restart iptables
-    loop:
-      - 110-raw-rule-custom
-      - 210-nat-rule-custom
-      - 410-mangle-rule-custom
-      - 710-filter-rule-custom
+    - name: deploy iptables rules custom scripts
+      template:
+        src: 'rules.d/{{ item }}.sh.j2'
+        dest: '/etc/iptables/rules.d/{{ item }}.sh'
+        mode: '0644'
+      notify: restart iptables
+      loop:
+        - 110-raw-rule-custom
+        - 210-nat-rule-custom
+        - 410-mangle-rule-custom
+        - 710-filter-rule-custom
 
-  - name: deploy iptables rules custom prio scripts
-    template:
-      src: rules.d/xxx-custom.sh.j2
-      dest: '/etc/iptables/rules.d/{{ item.prio }}-rule-custom.sh'
-      mode: '0644'
-    notify: restart iptables
-    loop: "{{ iptables_rules_custom }}"
+    - name: deploy iptables rules custom prio scripts
+      template:
+        src: rules.d/xxx-custom.sh.j2
+        dest: '/etc/iptables/rules.d/{{ item.prio }}-rule-custom.sh'
+        mode: '0644'
+      notify: restart iptables
+      loop: "{{ iptables_rules_custom }}"
 
-  - name: create iptables scripts
-    copy:
-      src: 'sbin/{{ item }}.sh'
-      dest: '/usr/local/sbin/{{ item }}'
-      mode: '0755'
-    notify: restart iptables
-    loop:
-      - iptables-restart
-      - iptables-start
-      - iptables-stop
-      - iptables-flush
-      - ipset-flush
-      - ipset-refresh
+    - name: create iptables scripts
+      copy:
+        src: 'sbin/{{ item }}.sh'
+        dest: '/usr/local/sbin/{{ item }}'
+        mode: '0755'
+      notify: restart iptables
+      loop:
+        - iptables-restart
+        - iptables-start
+        - iptables-stop
+        - iptables-flush
+        - ipset-flush
+        - ipset-refresh
 
-  - name: create iptables systemd service file
-    template:
-      src: service/iptables.service.j2
-      dest: /etc/systemd/system/iptables.service
-      owner: root
-      group: root
-      mode: '0644'
+    - name: create iptables systemd service file
+      template:
+        src: service/iptables.service.j2
+        dest: /etc/systemd/system/iptables.service
+        owner: root
+        group: root
+        mode: '0644'
 
-  - name: create iptables rsyslog config
-    copy:
-      src: log/rsyslog.conf
-      dest: /etc/rsyslog.d/90-iptables.conf
-      owner: root
-      group: root
-      mode: '0644'
-    notify: restart rsyslog
+    - name: create iptables rsyslog config
+      copy:
+        src: log/rsyslog.conf
+        dest: /etc/rsyslog.d/90-iptables.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart rsyslog
 
-  - name: create iptables logrotate config
-    copy:
-      src: log/logrotate.conf
-      dest: /etc/logrotate.d/iptables.conf
-      owner: root
-      group: root
-      mode: '0644'
+    - name: create iptables logrotate config
+      copy:
+        src: log/logrotate.conf
+        dest: /etc/logrotate.d/iptables.conf
+        owner: root
+        group: root
+        mode: '0644'
 
-  - name: create systemd other services override directories
-    file:
-      path: '/etc/systemd/system/{{ item }}.service.d'
-      state: directory
-      owner: root
-      group: root
-      mode: '0755'
-    loop: '{{ iptables_systemd_other_services_override }}'
+    - name: create systemd other services override directories
+      file:
+        path: '/etc/systemd/system/{{ item }}.service.d'
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      loop: '{{ iptables_systemd_other_services_override }}'
 
-  - name: create systemd other services override
-    copy:
-      src: service/other.service.override.conf
-      dest: '/etc/systemd/system/{{ item }}.service.d/override.conf'
-      owner: root
-      group: root
-      mode: '0644'
-    notify: reload systemd
-    loop: '{{ iptables_systemd_other_services_override }}'
+    - name: create systemd other services override
+      copy:
+        src: service/other.service.override.conf
+        dest: '/etc/systemd/system/{{ item }}.service.d/override.conf'
+        owner: root
+        group: root
+        mode: '0644'
+      notify: reload systemd
+      loop: '{{ iptables_systemd_other_services_override }}'
 
-  - name: enable and start systemd iptables.service
-    systemd:
-      enabled: yes
-      state: started
-      daemon_reload: yes
-      name: iptables
-    # We need async to keep the ssh connection alive when iptables
-    # is being deployed and started for the first time.
-    # As async is not compatible with check mode, we disable it there.
-    async: "{{ ansible_check_mode | ternary(0, 10) }}"
-    poll: 1
+    - name: enable and start systemd iptables.service
+      systemd:
+        enabled: yes
+        state: started
+        daemon_reload: yes
+        name: iptables
+      # We need async to keep the ssh connection alive when iptables
+      # is being deployed and started for the first time.
+      # As async is not compatible with check mode, we disable it there.
+      async: "{{ ansible_check_mode | ternary(0, 10) }}"
+      poll: 1
 
-  - name: create ipset systemd service and timer
-    template:
-      src: 'service/{{ item }}.j2'
-      dest: '/etc/systemd/system/{{ item }}'
-      owner: root
-      group: root
-      mode: '0644'
-    loop:
-      - ipset.service
-      - ipset.timer
+    - name: create ipset systemd service and timer
+      template:
+        src: 'service/{{ item }}.j2'
+        dest: '/etc/systemd/system/{{ item }}'
+        owner: root
+        group: root
+        mode: '0644'
+      loop:
+        - ipset.service
+        - ipset.timer
 
-  - name: update ipset systemd service enabled state
-    systemd:
-      enabled: "{{ iptables_lim_as_on }}"
-      daemon_reload: yes
-      name: ipset.service
+    - name: update ipset systemd service enabled state
+      systemd:
+        enabled: "{{ iptables_lim_as_on }}"
+        daemon_reload: yes
+        name: ipset.service
 
-  - name: update ipset systemd timer enabled and started state
-    systemd:
-      enabled: "{{ iptables_lim_as_on }}"
-      state: "{{ iptables_lim_as_on | ternary('started', 'stopped') }}"
-      daemon_reload: yes
-      name: ipset.timer
+    - name: update ipset systemd timer enabled and started state
+      systemd:
+        enabled: "{{ iptables_lim_as_on }}"
+        state: "{{ iptables_lim_as_on | ternary('started', 'stopped') }}"
+        daemon_reload: yes
+        name: ipset.timer
 
-  - name: cleanup old files
-    file:
-      path: '{{ item }}'
-      state: absent
-    loop:
-      - /etc/rsyslog.d/00-iptables.conf
-      - /usr/local/sbin/ipsets-flush
+    - name: cleanup old files
+      file:
+        path: '{{ item }}'
+        state: absent
+      loop:
+        - /etc/rsyslog.d/00-iptables.conf
+        - /usr/local/sbin/ipsets-flush
