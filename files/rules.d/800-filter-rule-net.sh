@@ -14,7 +14,7 @@ for n in ${nets} any; do
     if [[ "${n}" == "any" ]]; then
       if [[ -n "${lim_as[on]}" ]]; then
         echo -e "-${v} -N i-lim-as"
-        if [[ -n "${lim[ssh_any_on]}" ]]; then
+        if [[ -n "${lim[ip_ssh_any_on]}" ]]; then
           echo -e "-${v} -A INPUT -p tcp -m tcp ! --dport 22 -m set --match-set as src -j i-lim-as"
           if [[ -n "${lim_as[udp_on]}" ]]; then
             echo -e "-${v} -A INPUT -p udp -m udp ! --dport 22 -m set --match-set as src -j i-lim-as"

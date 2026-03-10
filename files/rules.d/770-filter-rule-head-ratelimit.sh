@@ -1,89 +1,89 @@
 #!/bin/bash
 
-if [[ -n "${lim[on]}" ]]; then
+if [[ -n "${lim[ip_on]}" ]]; then
   echo -e "# Add chain for ssh rate limit"
-  echo -e "-N i-lim-ssh"
-  echo -e "-4 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm4 src -j i-lim-ssh"
-  echo -e "-6 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm6 src -j i-lim-ssh"
+  echo -e "-N i-lim-ip"
+  echo -e "-4 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm4 src -j i-lim-ip"
+  echo -e "-6 -A INPUT   -p tcp -m tcp --dport 22 -m set ! --match-set adm6 src -j i-lim-ip"
 
-  if [[ -n "${lim[nets_exclude]}" ]]; then
+  if [[ -n "${lim[ip_nets_exclude]}" ]]; then
     echo -e "# Exclude networks from rate limiting"
-    for n in ${lim[nets_exclude]}; do
-      echo -e "-A i-lim-ssh  -m set   --match-set ${n} src -j RETURN"
+    for n in ${lim[ip_nets_exclude]}; do
+      echo -e "-A i-lim-ip  -m set   --match-set ${n} src -j RETURN"
     done
   fi
 
   echo -e "# Track connection source in ssh-rate recent table"
-  echo -e "-A i-lim-ssh  -m recent --set --name lim-ssh"
+  echo -e "-A i-lim-ip  -m recent --set --name lim-ip"
 
-  if [[ -n "${lim[ssh_can_on]}" ]]; then
+  if [[ -n "${lim[ip_ssh_can_on]}" ]]; then
     echo -e "# Check if source (can) exceeds threshold -> add to set ban-ssh-can, log"
     [[ "${LOG_LEVEL}" > "${log[i_lim_ssh_can_lvl]}" ]] && echo -e "\
-             -A i-lim-ssh  -m set   --match-set can src \
+             -A i-lim-ip  -m set   --match-set can src \
              -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_can_secs]} \
-             --hitcount ${lim[ssh_can_hits]} \
-             --name lim-ssh \
+             --seconds ${lim[ip_ssh_can_secs]} \
+             --hitcount ${lim[ip_ssh_can_hits]} \
+             --name lim-ip \
              -m limit --limit ${log[i_lim_ssh_limit]} --limit-burst ${log[i_lim_ssh_burst]} \
-             -j LOG ${LOG_OPTS} \"[ipt-i]lim-ssh-can: \""
+             -j LOG ${LOG_OPTS} \"[ipt-i]lim-ip-can: \""
     [[ "${LOG_LEVEL}" > "${log[i_ban_ssh_can_lvl]}" ]] && echo -e "\
-             -A i-lim-ssh  -m set   --match-set can src \
+             -A i-lim-ip  -m set   --match-set can src \
              -m set ! --match-set ban-ssh-can src \
              -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_can_secs]} \
-             --hitcount ${lim[ssh_can_hits]} \
-             --name lim-ssh \
+             --seconds ${lim[ip_ssh_can_secs]} \
+             --hitcount ${lim[ip_ssh_can_hits]} \
+             --name lim-ip \
              -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
              -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-can: \""
-    echo -e "-A i-lim-ssh  -m set   --match-set can src \
+    echo -e "-A i-lim-ip  -m set   --match-set can src \
              -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_can_secs]} \
-             --hitcount ${lim[ssh_can_hits]} \
-             --name lim-ssh \
+             --seconds ${lim[ip_ssh_can_secs]} \
+             --hitcount ${lim[ip_ssh_can_hits]} \
+             --name lim-ip \
              -j SET --add-set ban-ssh-can src --exist"
   fi
 
-  if [[ -n "${lim[ssh_any_on]}" ]]; then
+  if [[ -n "${lim[ip_ssh_any_on]}" ]]; then
     echo -e "# Check if source (not can) exceeds threshold -> add to set ban-ssh-any, log"
     [[ "${LOG_LEVEL}" > "${log[i_lim_ssh_any_lvl]}" ]] && echo -e "\
-             -A i-lim-ssh  -m set ! --match-set can src \
+             -A i-lim-ip  -m set ! --match-set can src \
              -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_any_secs]} \
-             --hitcount ${lim[ssh_any_hits]} \
-             --name lim-ssh \
+             --seconds ${lim[ip_ssh_any_secs]} \
+             --hitcount ${lim[ip_ssh_any_hits]} \
+             --name lim-ip \
              -m limit --limit ${log[i_lim_ssh_limit]} --limit-burst ${log[i_lim_ssh_burst]} \
-             -j LOG ${LOG_OPTS} \"[ipt-i]lim-ssh-any: \""
+             -j LOG ${LOG_OPTS} \"[ipt-i]lim-ip-any: \""
     [[ "${LOG_LEVEL}" > "${log[i_ban_ssh_any_lvl]}" ]] && echo -e "\
-             -A i-lim-ssh  -m set ! --match-set can src \
+             -A i-lim-ip  -m set ! --match-set can src \
              -m set ! --match-set ban-ssh-any src \
              -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_any_secs]} \
-             --hitcount ${lim[ssh_any_hits]} \
-             --name lim-ssh \
+             --seconds ${lim[ip_ssh_any_secs]} \
+             --hitcount ${lim[ip_ssh_any_hits]} \
+             --name lim-ip \
              -m limit --limit ${log[i_ban_ssh_limit]} --limit-burst ${log[i_ban_ssh_burst]} \
              -j LOG ${LOG_OPTS} \"[ipt-i]ban-ssh-any: \""
-    echo -e "-A i-lim-ssh  -m set ! --match-set can src \
+    echo -e "-A i-lim-ip  -m set ! --match-set can src \
              -m recent --rcheck --rttl \
-             --seconds ${lim[ssh_any_secs]} \
-             --hitcount ${lim[ssh_any_hits]} \
-             --name lim-ssh \
+             --seconds ${lim[ip_ssh_any_secs]} \
+             --hitcount ${lim[ip_ssh_any_hits]} \
+             --name lim-ip \
              -j SET --add-set ban-ssh-any src --exist"
   fi
 
   echo -e "# Deny connections from sources in block-ssh* tables"
   if [[ "${deny_target_drop}" != "true" ]]; then
-    echo -e "-4 -A i-lim-ssh -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp-admin-prohibited"
-    echo -e "-6 -A i-lim-ssh -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp6-adm-prohibited"
-    echo -e "-4 -A i-lim-ssh -m set --match-set ban-ssh-any src -j REJECT --reject-with icmp-admin-prohibited"
-    echo -e "-6 -A i-lim-ssh -m set --match-set ban-ssh-any src -j REJECT --reject-with icmp6-adm-prohibited"
+    echo -e "-4 -A i-lim-ip -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp-admin-prohibited"
+    echo -e "-6 -A i-lim-ip -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp6-adm-prohibited"
+    echo -e "-4 -A i-lim-ip -m set --match-set ban-ssh-any src -j REJECT --reject-with icmp-admin-prohibited"
+    echo -e "-6 -A i-lim-ip -m set --match-set ban-ssh-any src -j REJECT --reject-with icmp6-adm-prohibited"
   else
-    echo -e "-4 -A i-lim-ssh -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp-admin-prohibited"
-    echo -e "-6 -A i-lim-ssh -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp6-adm-prohibited"
-    echo -e "-4 -A i-lim-ssh -m set --match-set ban-ssh-any src -j DROP"
-    echo -e "-6 -A i-lim-ssh -m set --match-set ban-ssh-any src -j DROP"
+    echo -e "-4 -A i-lim-ip -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp-admin-prohibited"
+    echo -e "-6 -A i-lim-ip -m set --match-set ban-ssh-can src -j REJECT --reject-with icmp6-adm-prohibited"
+    echo -e "-4 -A i-lim-ip -m set --match-set ban-ssh-any src -j DROP"
+    echo -e "-6 -A i-lim-ip -m set --match-set ban-ssh-any src -j DROP"
   fi
 
-  echo -e "-A i-lim-ssh -j RETURN"
+  echo -e "-A i-lim-ip -j RETURN"
 fi
 
 echo -ne '\n'
