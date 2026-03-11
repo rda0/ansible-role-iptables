@@ -39,3 +39,33 @@ iptables_lim_as_ip_on: true
 iptables_lim_as_ip_rate: '10/minute'
 # Per-IP burst
 iptables_lim_as_ip_burst: '20'
+# List of large ASNs (example: ['123','45678']) requiring increased ipset hashsize and maxelem
+iptables_lim_as_large: []
+
+# country rate limits
+# Enable country rate limits
+iptables_lim_cc_on: false
+# Enable country rate limits (UDP)
+iptables_lim_cc_udp_on: false
+# Server to fetch country subnets (`proto://server:[port]`)
+iptables_lim_cc_server: '{{ iptables_lim_as_server }}'
+# Internal variable: List of all countries (limited and blocked)
+_iptables_lim_cc_list: '{{ iptables_lim_cc_block + iptables_lim_cc_limit }}'
+# List of country codes to rate-limit
+iptables_lim_cc_limit: []
+# List of country codes to hard block (REJECT/DROP)
+iptables_lim_cc_block: []
+# List of ports or leave empty to limit all ports
+iptables_lim_cc_ports: ''
+# Maximum average rate[/second|/minute|/hour|/day]
+iptables_lim_cc_rate: '40/minute'
+# Maximum initial number of packets to match
+iptables_lim_cc_burst: '40'
+# Enable per-IP rate limits within country rate limiting
+iptables_lim_cc_ip_on: true
+# Per-IP rate [/second|/minute|/hour|/day]
+iptables_lim_cc_ip_rate: '10/minute'
+# Per-IP burst
+iptables_lim_cc_ip_burst: '20'
+# List of large countries (example: ['US','CA']) requiring increased ipset hashsize and maxelem
+iptables_lim_cc_large: ['US']

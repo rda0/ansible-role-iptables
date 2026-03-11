@@ -62,6 +62,7 @@ log_lvl_input="{{ iptables_log_lvl_input }}"
 log_lvl_special="{{ iptables_log_lvl_special }}"
 log_lvl_ban_ssh="{{ iptables_log_lvl_ban_ssh }}"
 log_lvl_lim_as="{{ iptables_log_lvl_lim_as }}"
+log_lvl_lim_cc="{{ iptables_log_lvl_lim_cc }}"
 
 # Log levels (logged when: main log_level > individual level defined here)
 log[o_deny_lvl]="{{ iptables_log_o_deny_lvl }}"
@@ -76,6 +77,8 @@ log[i_ban_ssh_can_lvl]="{{ iptables_log_i_ban_ssh_can_lvl }}"
 log[i_ban_ssh_any_lvl]="{{ iptables_log_i_ban_ssh_any_lvl }}"
 log[i_lim_as_ratelimit_lvl]="{{ iptables_log_i_lim_as_ratelimit_lvl }}"
 log[i_lim_as_block_lvl]="{{ iptables_log_i_lim_as_block_lvl }}"
+log[i_lim_cc_ratelimit_lvl]="{{ iptables_log_i_lim_cc_ratelimit_lvl }}"
+log[i_lim_cc_block_lvl]="{{ iptables_log_i_lim_cc_block_lvl }}"
 log[f_any_s_prv_lvl]="{{ iptables_log_f_any_s_prv_lvl }}"
 log[i_any_s_prv_lvl]="{{ iptables_log_i_any_s_prv_lvl }}"
 log[i_bcast_lvl]="{{ iptables_log_i_bcast_lvl }}"
@@ -107,6 +110,10 @@ log[i_lim_as_ratelimit_limit]="{{ iptables_log_i_lim_as_ratelimit_limit }}"
 log[i_lim_as_ratelimit_burst]="{{ iptables_log_i_lim_as_ratelimit_burst }}"
 log[i_lim_as_block_limit]="{{ iptables_log_i_lim_as_block_limit }}"
 log[i_lim_as_block_burst]="{{ iptables_log_i_lim_as_block_burst }}"
+log[i_lim_cc_ratelimit_limit]="{{ iptables_log_i_lim_cc_ratelimit_limit }}"
+log[i_lim_cc_ratelimit_burst]="{{ iptables_log_i_lim_cc_ratelimit_burst }}"
+log[i_lim_cc_block_limit]="{{ iptables_log_i_lim_cc_block_limit }}"
+log[i_lim_cc_block_burst]="{{ iptables_log_i_lim_cc_block_burst }}"
 log[f_any_s_prv_limit]="{{ iptables_log_f_any_s_prv_limit }}"
 log[f_any_s_prv_burst]="{{ iptables_log_f_any_s_prv_burst }}"
 log[i_any_s_prv_limit]="{{ iptables_log_i_any_s_prv_limit }}"
@@ -163,6 +170,33 @@ lim[as_ip_on]="{{ iptables_lim_as_ip_on | ternary('1', '') }}"
 lim[as_ip_rate]="{{ iptables_lim_as_ip_rate }}"
 # Per-IP burst
 lim[as_ip_burst]="{{ iptables_lim_as_ip_burst }}"
+# Space separated list of large ASNs (example: "123 45678") requiring increased ipset hashsize and maxelem
+lim[as_large]="{{ iptables_lim_as_large | join(' ') if iptables_lim_as_on else '' }}"
+
+# Enable country rate limits
+lim[cc_on]="{{ iptables_lim_cc_on | ternary('1', '') }}"
+# Enable country rate limits (UDP)
+lim[cc_udp_on]="{{ iptables_lim_cc_udp_on | ternary('1', '') }}"
+# Server to fetch country subnets (`proto://server:[port]`)
+lim[cc_server]="{{ iptables_lim_cc_server }}"
+# List of country codes to limit or block
+lim[cc_list]="{{ _iptables_lim_cc_list | join(' ') if iptables_lim_cc_on else '' }}"
+# Selection of country codes (subset of lim[cc_list]) to hard block (REJECT/DROP)
+lim[cc_block]="{{ iptables_lim_cc_block | join(' ') if iptables_lim_cc_on else '' }}"
+# List of ports or leave empty to limit all ports
+lim[cc_ports]="{{ iptables_lim_cc_ports }}"
+# Maximum average rate[/second|/minute|/hour|/day]
+lim[cc_rate]="{{ iptables_lim_cc_rate }}"
+# Maximum initial number of packets to match
+lim[cc_burst]="{{ iptables_lim_cc_burst }}"
+# Enable per-IP rate limits within country rate limiting
+lim[cc_ip_on]="{{ iptables_lim_cc_ip_on | ternary('1', '') }}"
+# Per-IP rate [/second|/minute|/hour|/day]
+lim[cc_ip_rate]="{{ iptables_lim_cc_ip_rate }}"
+# Per-IP burst
+lim[cc_ip_burst]="{{ iptables_lim_cc_ip_burst }}"
+# Space separated list of large countries (example: "US CA") requiring increased ipset hashsize and maxelem
+lim[cc_large]="{{ iptables_lim_cc_large | join(' ') if iptables_lim_cc_on else '' }}"
 
 
 ### Networks (in CIDR notation)

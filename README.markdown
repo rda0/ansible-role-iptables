@@ -38,6 +38,7 @@ This role is not intended for routers with lots of interfaces which would requir
 - Integrates with other service units: fail2ban, libvirtd, lxd, docker
 - Port rate limiting: protects sensitive ports like ssh from bruteforce attacks
 - Per AS rate-limiting/blocking: protects all ports or selected ports from selected ASNs (https://en.wikipedia.org/wiki/Autonomous_system_(Internet)), requires additional web API: https://github.com/rda0/iptoasn-webservice
+- Per country code rate-limiting/blocking: protects all ports or selected ports from selected country codes (https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes), requires additional web API: https://github.com/rda0/iptoasn-webservice
 - Extensive logging: all denied packets can be logged (depending on the configured loglevel)
 - Logging DOS protection: all types of denied packets are limited by a separately configurable rate limit
 - Port forwarding rules: applicable for IPv4 only (experimental)
@@ -308,6 +309,21 @@ iptables_lim_as_block:
 ```
 
 List ASNs with or without `AS` prefix.
+
+### Per country rate-limit
+
+Use this to protect from DDOS by aggressive ASNs:
+
+```yaml
+iptables_lim_cc_on: true
+iptables_lim_cc_limit:
+  - IN
+  - US
+iptables_lim_cc_block:
+  - BR
+```
+
+List of ISO country codes.
 
 ## Custom rules
 

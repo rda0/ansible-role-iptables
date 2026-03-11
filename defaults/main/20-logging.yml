@@ -20,6 +20,7 @@ iptables_log_lvl_input: 2
 iptables_log_lvl_special: 3
 iptables_log_lvl_ban_ssh: 2
 iptables_log_lvl_lim_as: 2
+iptables_log_lvl_lim_cc: 2
 
 # log levels [ofi] (output, forward, input)
 #iptables_log_{[ofi]_deny,[ofi]_invalid,[fi]_any_s_prv}_lvl
@@ -36,6 +37,8 @@ iptables_log_i_ban_ssh_can_lvl: ${log_lvl_ban_ssh}
 iptables_log_i_ban_ssh_any_lvl: ${log_lvl_ban_ssh}
 iptables_log_i_lim_as_ratelimit_lvl: ${log_lvl_lim_as}
 iptables_log_i_lim_as_block_lvl: ${log_lvl_lim_as}
+iptables_log_i_lim_cc_ratelimit_lvl: ${log_lvl_lim_cc}
+iptables_log_i_lim_cc_block_lvl: ${log_lvl_lim_cc}
 iptables_log_f_any_s_prv_lvl: ${log_lvl_forward}
 iptables_log_i_any_s_prv_lvl: ${log_lvl_input}
 iptables_log_i_bcast_lvl: ${log_lvl_special}
@@ -71,6 +74,10 @@ iptables_log_i_lim_as_ratelimit_limit: ${log_limit}
 iptables_log_i_lim_as_ratelimit_burst: ${log_burst}
 iptables_log_i_lim_as_block_limit: ${log_limit}
 iptables_log_i_lim_as_block_burst: ${log_burst}
+iptables_log_i_lim_cc_ratelimit_limit: ${log_limit}
+iptables_log_i_lim_cc_ratelimit_burst: ${log_burst}
+iptables_log_i_lim_cc_block_limit: ${log_limit}
+iptables_log_i_lim_cc_block_burst: ${log_burst}
 iptables_log_f_any_s_prv_limit: ${log_limit}
 iptables_log_f_any_s_prv_burst: ${log_burst}
 iptables_log_i_any_s_prv_limit: ${log_limit}

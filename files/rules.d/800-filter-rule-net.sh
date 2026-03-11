@@ -12,21 +12,23 @@ for n in ${nets} any; do
   [[ -n "${ch[f]}" ]] &&                                     echo -e "-N f-net-${n}"
   for v in 4 6; do
     if [[ "${n}" == "any" ]]; then
-      if [[ -n "${lim[as_on]}" ]]; then
-        echo -e "-${v} -N i-lim-as"
-        if [[ -n "${lim[ip_ssh_any_on]}" ]]; then
-          echo -e "-${v} -A INPUT -p tcp -m tcp ! --dport 22 -m set --match-set as src -j i-lim-as"
-          if [[ -n "${lim[as_udp_on]}" ]]; then
-            echo -e "-${v} -A INPUT -p udp -m udp ! --dport 22 -m set --match-set as src -j i-lim-as"
-          fi
-        else
-          if [[ -n "${lim[as_udp_on]}" ]]; then
-            echo -e "-${v} -A INPUT -m set --match-set as src -j i-lim-as"
+      for a in as cc; do
+        if [[ -n "${lim[${a}_on]}" ]]; then
+          echo -e "-${v} -N i-lim-${a}"
+          if [[ -n "${lim[ip_ssh_any_on]}" ]]; then
+            echo -e "-${v} -A INPUT -p tcp -m tcp ! --dport 22 -m set --match-set ${a} src -j i-lim-${a}"
+            if [[ -n "${lim[${a}_udp_on]}" ]]; then
+              echo -e "-${v} -A INPUT -p udp -m udp ! --dport 22 -m set --match-set ${a} src -j i-lim-${a}"
+            fi
           else
-            echo -e "-${v} -A INPUT -p tcp -m set --match-set as src -j i-lim-as"
+            if [[ -n "${lim[${a}_udp_on]}" ]]; then
+              echo -e "-${v} -A INPUT -m set --match-set ${a} src -j i-lim-${a}"
+            else
+              echo -e "-${v} -A INPUT -p tcp -m set --match-set ${a} src -j i-lim-${a}"
+            fi
           fi
         fi
-      fi
+      done
       [[ -n "${ch[i]}" ]] &&                                     echo -e "-${v} -A INPUT   -j i-net-${n}"
       [[ -n "${ch[o]}" ]] && [[ "${allow_o_any}" != "true" ]] && echo -e "-${v} -A OUTPUT  -j o-net-${n}"
       [[ -n "${ch[f]}" ]] && [[ "${v}" == "4" ]] &&              echo -e "-${v} -A FORWARD -j f-net-${n}"

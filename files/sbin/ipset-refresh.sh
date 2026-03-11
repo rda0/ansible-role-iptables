@@ -9,21 +9,27 @@ function debug {
     fi
 }
 
-# Load config to get lim_as[*]
+# Load config to get lim_as[*] / lim_cc[*]
 . "${CONF}/iptables.conf"
-
-# Only act if enabled
-[[ -z "${lim[as_on]}" ]] && exit 0
 
 CACHE_DIR="${CONF}/as-cache"
 mkdir -p "${CACHE_DIR}" 2>/dev/null || true
 
 # Helper: fetch subnets (text/plain) using xh preferred, fallback to curl.
-# On failure, try cache; log to stderr and skip AS if nothing available.
+# On failure, try cache; log to stderr and skip AS/CC if nothing available.
 fetch_subnets() {
-  local as_num="$1"
-  local url="${lim[as_server]}/v1/as/n/AS${as_num}/subnets"
-  local cache_file="${CACHE_DIR}/AS${as_num}.subnets"
+  local a="$1"
+  local id="$2"
+  local url=""
+  local cache_file=""
+
+  if [[ "${a}" == "as" ]]; then
+    url="${lim[as_server]}/v1/as/n/AS${id}/subnets"
+    cache_file="${CACHE_DIR}/AS${id}.subnets"
+  else
+    url="${lim[cc_server]}/v1/as/country/${id}/subnets"
+    cache_file="${CACHE_DIR}/cc${id}.subnets"
+  fi
 
   local data=""
   if command -v xh >/dev/null 2>&1; then
@@ -45,57 +51,87 @@ fetch_subnets() {
   fi
 
   if [[ -s "${cache_file}" ]]; then
-    >&2 echo "WARN: iptoasn fetch failed for AS${as_num}, using cache ${cache_file}"
+    if [[ "${a}" == "as" ]]; then
+      >&2 echo "WARN: iptoasn fetch failed for AS${id}, using cache ${cache_file}"
+    else
+      >&2 echo "WARN: iptoasn fetch failed for cc${id}, using cache ${cache_file}"
+    fi
     cat "${cache_file}"
     return 0
   fi
 
-  >&2 echo "ERROR: unable to obtain subnets for AS${as_num}; skipping refresh for this AS"
+  if [[ "${a}" == "as" ]]; then
+    >&2 echo "ERROR: unable to obtain subnets for AS${id}; skipping refresh for this AS"
+  else
+    >&2 echo "ERROR: unable to obtain subnets for cc${id}; skipping refresh for this CC"
+  fi
   return 1
 }
-
-# Ensure aggregated sets exist and are wired
-/sbin/ipset -exist create as list:set
 
 # Prepare restore script
 tmpfile="$(mktemp)"
 trap 'rm -f "${tmpfile}"' EXIT
 
 {
-  for ASN in ${lim[as_list]}; do
-    as_num="$(echo "${ASN}" | sed 's/^[Aa][Ss]//; s/[^0-9]//g')"
-    [[ -z "${as_num}" ]] && continue
+  for a in as cc; do
+    # Only act if enabled
+    [[ -z "${lim[${a}_on]}" ]] && continue
 
-    # Ensure sets exist
-    /sbin/ipset -exist create "as${as_num}_4" hash:net family inet
-    /sbin/ipset -exist create "as${as_num}_6" hash:net family inet6
-    # Wire membership (no nested list:set in overall set)
-    /sbin/ipset -exist add    "as"            "as${as_num}_4"      >/dev/null 2>&1 || true
-    /sbin/ipset -exist add    "as"            "as${as_num}_6"      >/dev/null 2>&1 || true
+    # Ensure aggregated sets exist and are wired
+    /sbin/ipset -exist create "${a}" list:set
 
-    subnets="$(fetch_subnets "${as_num}" || true)"
-    if [[ -z "${subnets}" ]]; then
-      >&2 echo "WARN: no data for AS${as_num}; leaving current set content unchanged"
-      continue
-    fi
-
-    # Flush and repopulate leaf sets
-    echo "flush as${as_num}_4"
-    echo "flush as${as_num}_6"
-    while IFS= read -r prefix; do
-      [[ -z "${prefix}" ]] && continue
-      if [[ "${prefix}" == *:* ]]; then
-        echo "add as${as_num}_6 ${prefix} -exist"
+    for ID in ${lim[${a}_list]}; do
+      if [[ "${a}" == "as" ]]; then
+        id="$(echo "${ID}" | sed 's/^[Aa][Ss]//; s/[^0-9]//g')"
       else
-        echo "add as${as_num}_4 ${prefix} -exist"
+        id="$(echo "${ID}" | tr '[:lower:]' '[:upper:]' | sed 's/[^A-Z]//g')"
       fi
-    done <<< "${subnets}"
+      [[ -z "${id}" ]] && continue
+
+      # Ensure sets exist
+      if [[ " ${lim[${a}_large]} " == *" ${id} "* ]]; then
+        /sbin/ipset -exist create "${a}${id}_4" hash:net family inet  hashsize 2048 maxelem 131072
+        /sbin/ipset -exist create "${a}${id}_6" hash:net family inet6 hashsize 2048 maxelem 131072
+      else
+        # uses the default hashsize 1024 maxelem 65536
+        /sbin/ipset -exist create "${a}${id}_4" hash:net family inet
+        /sbin/ipset -exist create "${a}${id}_6" hash:net family inet6
+      fi
+
+      # Wire membership (no nested list:set in overall set)
+      /sbin/ipset -exist add    "${a}"         "${a}${id}_4"      >/dev/null 2>&1 || true
+      /sbin/ipset -exist add    "${a}"         "${a}${id}_6"      >/dev/null 2>&1 || true
+
+      subnets="$(fetch_subnets "${a}" "${id}" || true)"
+      if [[ -z "${subnets}" ]]; then
+        if [[ "${a}" == "as" ]]; then
+          >&2 echo "WARN: no data for AS${id}; leaving current set content unchanged"
+        else
+          >&2 echo "WARN: no data for cc${id}; leaving current set content unchanged"
+        fi
+        continue
+      fi
+
+      # Flush and repopulate leaf sets
+      echo "flush ${a}${id}_4"
+      echo "flush ${a}${id}_6"
+      while IFS= read -r prefix; do
+        [[ -z "${prefix}" ]] && continue
+        if [[ "${prefix}" == *:* ]]; then
+          [[ "${DEBUG}" > 1 ]] && >&2 echo "add ${a}${id}_6 ${prefix} -exist"
+          echo "add ${a}${id}_6 ${prefix} -exist"
+        else
+          [[ "${DEBUG}" > 1 ]] && >&2 echo "add ${a}${id}_6 ${prefix} -exist"
+          echo "add ${a}${id}_4 ${prefix} -exist"
+        fi
+      done <<< "${subnets}"
+    done
   done
 } > "${tmpfile}"
 
 # Apply refresh atomically
 if [[ -s "${tmpfile}" ]]; then
-  debug "Refreshing AS ipsets"
+  debug "Refreshing AS/CC ipsets"
   /sbin/ipset restore -f "${tmpfile}"
 else
   >&2 echo "WARN: ipset-refresh: nothing to update (no data)."
