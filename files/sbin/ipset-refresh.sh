@@ -13,7 +13,7 @@ function debug {
 . "${CONF}/iptables.conf"
 
 # Only act if enabled
-[[ -z "${lim_as[on]}" ]] && exit 0
+[[ -z "${lim[as_on]}" ]] && exit 0
 
 CACHE_DIR="${CONF}/as-cache"
 mkdir -p "${CACHE_DIR}" 2>/dev/null || true
@@ -22,7 +22,7 @@ mkdir -p "${CACHE_DIR}" 2>/dev/null || true
 # On failure, try cache; log to stderr and skip AS if nothing available.
 fetch_subnets() {
   local as_num="$1"
-  local url="${lim_as[server]}/v1/as/n/AS${as_num}/subnets"
+  local url="${lim[as_server]}/v1/as/n/AS${as_num}/subnets"
   local cache_file="${CACHE_DIR}/AS${as_num}.subnets"
 
   local data=""
@@ -62,7 +62,7 @@ tmpfile="$(mktemp)"
 trap 'rm -f "${tmpfile}"' EXIT
 
 {
-  for ASN in ${lim_as[list]}; do
+  for ASN in ${lim[as_list]}; do
     as_num="$(echo "${ASN}" | sed 's/^[Aa][Ss]//; s/[^0-9]//g')"
     [[ -z "${as_num}" ]] && continue
 

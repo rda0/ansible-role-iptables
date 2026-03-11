@@ -8,7 +8,7 @@ CACHE_DIR="${CONF}/as-cache"
 mkdir -p "${CACHE_DIR}" 2>/dev/null || true
 
 # Only act if enabled
-[[ -z "${lim_as[on]}" ]] && return
+[[ -z "${lim[as_on]}" ]] && return
 
 # Overall AS set (includes leaf v4/v6 sets for every AS; NOT nested list:set)
 echo -e "create as list:set"
@@ -17,7 +17,7 @@ echo -e "create as list:set"
 # On failure, use cache; if no cache, fallback to dumped.ipsets; log to stderr.
 fetch_subnets() {
   local as_num="$1"
-  local url="${lim_as[server]}/v1/as/n/AS${as_num}/subnets"
+  local url="${lim[as_server]}/v1/as/n/AS${as_num}/subnets"
   local cache_file="${CACHE_DIR}/AS${as_num}.subnets"
 
   # Prefer xh
@@ -65,7 +65,7 @@ fetch_subnets() {
   return 1
 }
 
-for ASN in ${lim_as[list]}; do
+for ASN in ${lim[as_list]}; do
   # normalize ASN: strip any leading AS/as and keep only digits
   as_num="$(echo "${ASN}" | sed 's/^[Aa][Ss]//; s/[^0-9]//g')"
   [[ -z "${as_num}" ]] && continue

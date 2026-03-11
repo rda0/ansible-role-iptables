@@ -52,8 +52,6 @@ declare -A port
 declare -A nat
 # Rate limit hashtable
 declare -A lim
-# Rate limit as hashtable
-declare -A lim_as
 # Logging limit hashtable
 declare -A log
 
@@ -144,27 +142,27 @@ lim[ip_ssh_any_hits]="{{ iptables_lim_ip_ssh_any_hits }}"
 lim[ip_ssh_any_time]="{{ iptables_lim_ip_ssh_any_time }}"
 
 # Enable AS rate limits
-lim_as[on]="{{ iptables_lim_as_on | ternary('1', '') }}"
+lim[as_on]="{{ iptables_lim_as_on | ternary('1', '') }}"
 # Enable AS rate limits (UDP)
-lim_as[udp_on]="{{ iptables_lim_as_udp_on | ternary('1', '') }}"
+lim[as_udp_on]="{{ iptables_lim_as_udp_on | ternary('1', '') }}"
 # Server to fetch AS subnets (`proto://server:[port]`)
-lim_as[server]="{{ iptables_lim_as_server }}"
+lim[as_server]="{{ iptables_lim_as_server }}"
 # List of ASNs to limit or block
-lim_as[list]="{{ _iptables_lim_as_list | join(' ') if iptables_lim_as_on else '' }}"
-# Selection of ASNs (subset of lim_as[list]) to hard block (REJECT/DROP)
-lim_as[block]="{{ iptables_lim_as_block | join(' ') if iptables_lim_as_on else '' }}"
+lim[as_list]="{{ _iptables_lim_as_list | join(' ') if iptables_lim_as_on else '' }}"
+# Selection of ASNs (subset of lim[as_list]) to hard block (REJECT/DROP)
+lim[as_block]="{{ iptables_lim_as_block | join(' ') if iptables_lim_as_on else '' }}"
 # List of ports or leave empty to limit all ports
-lim_as[ports]="{{ iptables_lim_as_ports }}"
+lim[as_ports]="{{ iptables_lim_as_ports }}"
 # Maximum average rate[/second|/minute|/hour|/day]
-lim_as[rate]="{{ iptables_lim_as_rate }}"
+lim[as_rate]="{{ iptables_lim_as_rate }}"
 # Maximum initial number of packets to match
-lim_as[burst]="{{ iptables_lim_as_burst }}"
+lim[as_burst]="{{ iptables_lim_as_burst }}"
 # Enable per-IP rate limits within AS rate limiting
-lim_as[ip_on]="{{ iptables_lim_as_ip_on | ternary('1', '') }}"
+lim[as_ip_on]="{{ iptables_lim_as_ip_on | ternary('1', '') }}"
 # Per-IP rate [/second|/minute|/hour|/day]
-lim_as[ip_rate]="{{ iptables_lim_as_ip_rate }}"
+lim[as_ip_rate]="{{ iptables_lim_as_ip_rate }}"
 # Per-IP burst
-lim_as[ip_burst]="{{ iptables_lim_as_ip_burst }}"
+lim[as_ip_burst]="{{ iptables_lim_as_ip_burst }}"
 
 
 ### Networks (in CIDR notation)
