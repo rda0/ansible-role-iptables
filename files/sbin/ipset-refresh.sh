@@ -90,8 +90,12 @@ trap 'rm -f "${tmpfile}"' EXIT
 
       # Ensure sets exist
       if [[ " ${lim[${a}_large]} " == *" ${id} "* ]]; then
-        /sbin/ipset -exist create "${a}${id}_4" hash:net family inet  hashsize 2048 maxelem 131072
-        /sbin/ipset -exist create "${a}${id}_6" hash:net family inet6 hashsize 2048 maxelem 131072
+        # factor 2
+        #/sbin/ipset -exist create "${a}${id}_4" hash:net family inet  hashsize 2048 maxelem 131072
+        #/sbin/ipset -exist create "${a}${id}_6" hash:net family inet6 hashsize 2048 maxelem 131072
+        # factor 4
+        /sbin/ipset -exist create "${a}${id}_4" hash:net family inet  hashsize 4096 maxelem 262144
+        /sbin/ipset -exist create "${a}${id}_6" hash:net family inet6 hashsize 4096 maxelem 262144
       else
         # uses the default hashsize 1024 maxelem 65536
         /sbin/ipset -exist create "${a}${id}_4" hash:net family inet

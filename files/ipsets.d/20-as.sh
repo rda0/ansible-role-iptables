@@ -100,8 +100,12 @@ for a in as cc; do
 
     # Create per-ID sets
     if [[ " ${lim[${a}_large]} " == *" ${id} "* ]]; then
-      echo -e "create ${a}${id}_4 hash:net family inet  hashsize 2048 maxelem 131072"
-      echo -e "create ${a}${id}_6 hash:net family inet6 hashsize 2048 maxelem 131072"
+      # factor 2:
+      #echo -e "create ${a}${id}_4 hash:net family inet  hashsize 2048 maxelem 131072"
+      #echo -e "create ${a}${id}_6 hash:net family inet6 hashsize 2048 maxelem 131072"
+      # factor 4:
+      echo -e "create ${a}${id}_4 hash:net family inet  hashsize 4096 maxelem 262144"
+      echo -e "create ${a}${id}_6 hash:net family inet6 hashsize 4096 maxelem 262144"
     else
       echo -e "create ${a}${id}_4 hash:net family inet"
       echo -e "create ${a}${id}_6 hash:net family inet6"
