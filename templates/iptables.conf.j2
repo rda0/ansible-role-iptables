@@ -155,9 +155,9 @@ lim[as_udp_on]="{{ iptables_lim_as_udp_on | ternary('1', '') }}"
 # Server to fetch AS subnets (`proto://server:[port]`)
 lim[as_server]="{{ iptables_lim_as_server }}"
 # List of ASNs to limit or block
-lim[as_list]="{{ _iptables_lim_as_list | join(' ') if iptables_lim_as_on else '' }}"
+lim[as_list]="{{ _iptables_lim_as_list | sort | join(' ') if iptables_lim_as_on else '' }}"
 # Selection of ASNs (subset of lim[as_list]) to hard block (REJECT/DROP)
-lim[as_block]="{{ iptables_lim_as_block | join(' ') if iptables_lim_as_on else '' }}"
+lim[as_block]="{{ _iptables_lim_as_block | sort | join(' ') if iptables_lim_as_on else '' }}"
 # List of ports or leave empty to limit all ports
 lim[as_ports]="{{ iptables_lim_as_ports }}"
 # Maximum average rate[/second|/minute|/hour|/day]
@@ -180,9 +180,9 @@ lim[cc_udp_on]="{{ iptables_lim_cc_udp_on | ternary('1', '') }}"
 # Server to fetch country subnets (`proto://server:[port]`)
 lim[cc_server]="{{ iptables_lim_cc_server }}"
 # List of country codes to limit or block
-lim[cc_list]="{{ _iptables_lim_cc_list | join(' ') if iptables_lim_cc_on else '' }}"
+lim[cc_list]="{{ _iptables_lim_cc_list | sort | join(' ') if iptables_lim_cc_on else '' }}"
 # Selection of country codes (subset of lim[cc_list]) to hard block (REJECT/DROP)
-lim[cc_block]="{{ iptables_lim_cc_block | join(' ') if iptables_lim_cc_on else '' }}"
+lim[cc_block]="{{ _iptables_lim_cc_block | sort | join(' ') if iptables_lim_cc_on else '' }}"
 # List of ports or leave empty to limit all ports
 lim[cc_ports]="{{ iptables_lim_cc_ports }}"
 # Maximum average rate[/second|/minute|/hour|/day]
